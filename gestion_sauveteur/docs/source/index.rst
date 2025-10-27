@@ -6,6 +6,9 @@
 Welcome to Application graphique de gestion des sauveteurs spéléologues's documentation!
 ========================================================================================
 
+Documentation du code
+*********************
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
