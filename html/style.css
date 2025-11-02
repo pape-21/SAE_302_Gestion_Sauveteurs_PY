@@ -30,3 +30,18 @@ footer {
     font-size: 0.9em;
     color: #555;
 }
+
+
+.teachers-zone{padding:14px;border-radius:10px}
+.teachers-zone .section-title{margin:0 0 10px 0;font-size:1rem;color:#1f2937}
+.teacher-list{display:flex;flex-wrap:wrap;gap:8px}
+.teacher-item{
+    background:#f3f6fb;color:var(--primary);
+    padding:8px 10px;border-radius:999px;font-weight:600;font-size:0.9rem;
+    border:1px solid rgba(11,102,195,0.06);
+}
+/* responsive */
+@media (max-width:560px){
+    .teacher-list{gap:6px}
+    .teacher-item{font-size:0.85rem;padding:6px 8px}
+}

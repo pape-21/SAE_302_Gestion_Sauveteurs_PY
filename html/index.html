@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Application de gestion des sauveteurs spéléologues</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Projet SAE 302 — Gestion des Sauveteurs Spéléologues</h1>
+        <p>Application PyQt de gestion des équipes de secours du Spéléo-Secours Français</p>
+    </header>
+
+    <main>
+        <section>
+            <h2>Auteur</h2>
+            <p><strong>Pape Birame Fall</strong></p>
+            <p><strong>Sokhna Gueye</strong></p>
+            <p><strong>Perceval Behanzin</strong></p>
+            <p><strong>Mohamed Fall</strong></p>
+        </section>
+
+
+        <div class="card teachers-zone">
+        <h3 class="section-title">Professeurs responsables</h3>
+        <div class="teacher-list">
+        <div class="teacher-item">Benoit Tremblais</div>
+        <div class="teacher-item">Vincent Verdon</div>
+        </div>
+        </div>
+        <section>
+            <h2>Objectif</h2>
+            <p>Créer une application graphique permettant de gérer les sauveteurs spéléologues, leur planning, leurs missions et leur disponibilité, avec synchronisation pair-à-pair sur un réseau local.</p>
+        </section>
+
+        <section>
+            <h2>Fonctionnalités principales</h2>
+            <ul>
+                <li>Gestion des sauveteurs et de leurs spécialités</li>
+                <li>Gestion du planning et des statuts colorés</li>   
+                <li>Interface graphique PyQt simple et claire</li>
+                <li>Synchronisation automatique entre plusieurs postes via TCP (port 5002)</li>
+                <li>Authentification par profils : gestionnaire, lecture, administration</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>Technologies utilisées</h2>
+            <ul>
+                <li>Python 3.10+</li>
+                <li>PyQt6 pour l’interface graphique</li>
+                <li>SQLite (base locale)</li>
+                <li>Communication socket TCP</li>
+                <li>Documentation Sphinx</li>
+            </ul>
+        </section>
+    </main>
+
+    <footer>
+        <p>© 2025 - Projet SAE 302 - IUT Informatique</p>
+    </footer>
+</body>
+</html>
