@@ -13,24 +13,70 @@
 
     <main>
         <section>
-            <h2>Auteur</h2>
+            <h2>Auteurs</h2>
             <p><strong>Pape Birame Fall</strong></p>
             <p><strong>Sokhna Gueye</strong></p>
             <p><strong>Perceval Behanzin</strong></p>
             <p><strong>Mohamed Fall</strong></p>
         </section>
 
+        <div class="carte zone-professeurs">
+            <h3 class="titre-section">Professeurs responsables</h3>
+            <div class="liste-professeurs">
+                <div class="element-prof">Benoit Tremblais</div>
+                <div class="element-prof">Vincent Verdon</div>
+            </div>
+        </div>
 
-        <div class="card teachers-zone">
-        <h3 class="section-title">Professeurs responsables</h3>
-        <div class="teacher-list">
-        <div class="teacher-item">Benoit Tremblais</div>
-        <div class="teacher-item">Vincent Verdon</div>
-        </div>
-        </div>
         <section>
             <h2>Objectif</h2>
             <p>Créer une application graphique permettant de gérer les sauveteurs spéléologues, leur planning, leurs missions et leur disponibilité, avec synchronisation pair-à-pair sur un réseau local.</p>
+        </section>
+
+        <section class="carte" id="repartition-des-taches">
+            <h2 class="titre-section">Répartition des tâches</h2>
+            <div class="grille-taches">
+                <div class="element-tache">
+                    <h3>Pape Birame Fall — Gestion de la base de données & backend</h3>
+                    <ul>
+                        <li>Répartition des tâches et page html statique</li>
+                        <li>Responsable du modèle de données (couche “Modèle” du MVC)</li>
+                        <li>Écrire le script SQL : <code>script_base_de_donne.sql</code></li>
+                        <li>Créer les fonctions Python d'accès (CRUD)</li>
+                        <li>Initialiser la base (<code>sauveteurs.db</code>) depuis Python</li>
+                        <li>Gérer import/export JSON des sauveteurs</li>
+                        <li>Fournir API Python : <code>ajouter_sauveteur()</code>, <code>get_sauveteurs()</code>, etc.</li>
+                    </ul>
+                </div>
+
+                <div class="element-tache">
+                    <h3>Sokhna Gueye — Interface graphique PyQt (Vue)</h3>
+                    <ul>
+                        <li>Créer fenêtres PyQt6 : authentification, planning, fiche récapitulative</li>
+                        <li>Gérer interactions (boutons, menus, tableaux)</li>
+                        <li>Intégrer couleurs du planning selon statuts</li>
+                    </ul>
+                </div>
+
+                <div class="element-tache">
+                    <h3>Perceval Behanzin — Logique applicative & synchronisation (Contrôleur)</h3>
+                    <ul>
+                        <li>Connecter la base aux interfaces via le module de Pape Birame Fall</li>
+                        <li>Gérer mises à jour du planning et statuts en temps réel</li>
+                        <li>Préparer communication réseau TCP (port 5002)</li>
+                        <li>Gérer profils utilisateurs (lecture, gestionnaire, admin)</li>
+                    </ul>
+                </div>
+
+                <div class="element-tache">
+                    <h3>Mohamed Fall — Documentation & tests</h3>
+                    <ul>
+                        <li>Mettre en place Sphinx (docs/)</li>
+                        <li>Rédiger .rst : installation, utilisation, description</li>
+                        <li>Créer tests unitaires (tests/) pour modèle et contrôleur</li>
+                    </ul>
+                </div>
+            </div>
         </section>
 
         <section>
@@ -57,7 +103,7 @@
     </main>
 
     <footer>
-        <p>© 2025 - Projet SAE 302 - IUT Informatique</p>
+        <p>© 2025 - Projet SAE 302 (Gestion Sauveteurs)- IUT de Châtellerault</p>
     </footer>
 </body>
 </html>

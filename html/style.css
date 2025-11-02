@@ -1,3 +1,9 @@
+:root{
+    --primary:#0b66c3;
+    --muted:#6b7280;
+}
+
+/* Base */
 body {
     font-family: Arial, sans-serif;
     margin: 40px;
@@ -31,17 +37,51 @@ footer {
     color: #555;
 }
 
-
-.teachers-zone{padding:14px;border-radius:10px}
-.teachers-zone .section-title{margin:0 0 10px 0;font-size:1rem;color:#1f2937}
-.teacher-list{display:flex;flex-wrap:wrap;gap:8px}
-.teacher-item{
+/* Zone des professeurs */
+.carte.zone-professeurs,
+.carte.zone-professeurs .titre-section{
+    padding:14px;border-radius:10px;
+}
+.titre-section{margin:0 0 10px 0;font-size:1rem;color:#1f2937}
+.liste-professeurs{display:flex;flex-wrap:wrap;gap:8px}
+.element-prof{
     background:#f3f6fb;color:var(--primary);
     padding:8px 10px;border-radius:999px;font-weight:600;font-size:0.9rem;
     border:1px solid rgba(11,102,195,0.06);
 }
-/* responsive */
+/* responsive profs */
 @media (max-width:560px){
-    .teacher-list{gap:6px}
-    .teacher-item{font-size:0.85rem;padding:6px 8px}
+    .liste-professeurs{gap:6px}
+    .element-prof{font-size:0.85rem;padding:6px 8px}
+}
+
+/* Répartition des tâches */
+#repartition-des-taches{padding:18px;border-radius:10px}
+#repartition-des-taches .titre-section{margin:0 0 12px 0;font-size:1.1rem;color:#0f172a}
+
+.grille-taches{
+    display:grid;
+    grid-template-columns:repeat(2, 1fr);
+    gap:16px;
+    align-items:start;
+}
+.element-tache{
+    background:linear-gradient(180deg,#fff,#fbfdff);
+    border:1px solid rgba(15,23,42,0.04);
+    padding:14px;border-radius:10px;
+    box-shadow:0 6px 14px rgba(8,15,30,0.03);
+}
+.element-tache h3{margin:0 0 8px 0;font-size:0.98rem;color:#0b3a66}
+.element-tache ul{margin:0;padding-left:18px;color:var(--muted);font-size:0.95rem}
+.element-tache li{margin-bottom:6px}
+
+/* petits écrans */
+@media (max-width:900px){
+    .grille-taches{grid-template-columns:1fr}
+}
+
+/* code inline dans tâches */
+.element-tache code{
+    background:#f3f6fb;padding:2px 6px;border-radius:6px;border:1px solid rgba(11,102,195,0.06);
+    font-size:0.9rem;color:var(--primary)
 }
