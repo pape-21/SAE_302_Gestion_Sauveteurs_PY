@@ -1,0 +1,27 @@
+# --- Python ---
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.db
+*.sqlite
+*.log
+
+# --- Virtualenv / venv ---
+.venv/
+env/
+venv/
+
+# --- IDE / éditeurs ---
+.vscode/
+.idea/
+
+# --- OS files ---
+.DS_Store
+Thumbs.db
+
+# --- Build Sphinx ---
+docs/build/
+
+# --- Fichiers temporaires ---
+*.tmp
