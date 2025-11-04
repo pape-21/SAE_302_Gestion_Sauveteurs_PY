@@ -1,5 +1,5 @@
 -- ===========================================
--- Base de données : Gestion des sauveteurs spéléologues
+-- Base de données SQLite : Gestion des sauveteurs spéléologues
 -- Auteur : Pape Birame Fall
 -- Date de création : 2025-10-31
 -- ===========================================
@@ -11,13 +11,14 @@ CREATE TABLE sauveteurs (
     prenom TEXT NOT NULL,
     departement TEXT,
     specialite TEXT CHECK(specialite IN (
-        'communications',
+        'communication',
         'assistance victime',
-        'médicale',
-        'désobstruction',
-        'évacuation',
-        'gestion',
-        'intendance'
+        'medicale',
+        'desobstruction',
+        'evacuation',
+        'brancardage',
+        'recherche'
+     
     ))
 );
 
