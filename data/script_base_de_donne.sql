@@ -59,7 +59,6 @@ CREATE TABLE utilisateurs (
     profil TEXT CHECK(profil IN (
         'gestionnaire',
         'lecture',
-        'administration',
-        'utilisateur'
+        'administrateur'
     ))
 );

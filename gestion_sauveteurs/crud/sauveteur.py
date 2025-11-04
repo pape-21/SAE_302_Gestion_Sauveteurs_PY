@@ -1,6 +1,10 @@
 import sqlite3
 from pathlib import Path
-db_path = Path("data/sauveteurs.db")
+
+
+db_path = Path("data/database.db")
+
+
 def ajouter_sauveteur(nom, prenom, departement, specialite):
 
     """
@@ -159,5 +163,5 @@ def compter_sauveteurs():
     cursor = connexion.cursor()
     cursor.execute("SELECT COUNT(*) FROM sauveteurs")
     nbr_de_sauveteurs = cursor.fetchone()[0]
-    conn.close()
+    connexion.close()
     return nbr_de_sauveteurs

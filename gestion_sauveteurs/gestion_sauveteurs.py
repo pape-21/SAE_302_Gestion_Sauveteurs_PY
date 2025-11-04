@@ -2,7 +2,7 @@ def main():
     import sqlite3
     from pathlib import Path
 
-    db_path = Path("data/sauveteurs.db")
+    db_path = Path("data/database.db")
     conn = sqlite3.connect(db_path)
     cur = conn.cursor()
 
