@@ -3,11 +3,15 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-      <title>Projet SAE 302 — Gestion des Sauveteurs Spéléologues</title>
+    <title>Projet SAE 302 — Gestion des Sauveteurs Spéléologues</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    
+    <header class="entete">
+        <h1>Projet SAE 302 — Gestion des Sauveteurs Spéléologues</h1>
+        <p class="sous-titre">Application de gestion des équipes de secours du Spéléo‑Secours Français</p>
+    </header>
+
     <main>
         <section id="auteurs" class="carte">
             <h2>Auteurs</h2>
