@@ -1,109 +1,109 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Application de gestion des sauveteurs spéléologues</title>
-    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rapport de Plannification du projet</title>
 </head>
 <body>
-    <header>
-        <h1>Projet SAE 302 — Gestion des Sauveteurs Spéléologues</h1>
-        <p>Application PyQt de gestion des équipes de secours du Spéléo-Secours Français</p>
-    </header>
 
-    <main>
-        <section>
-            <h2>Auteurs</h2>
-            <p><strong>Pape Birame Fall</strong></p>
-            <p><strong>Sokhna Gueye</strong></p>
-            <p><strong>Perceval Behanzin</strong></p>
-            <p><strong>Mohamed Fall</strong></p>
-        </section>
+    Projet SAE 302 — Gestion des Sauveteurs Spéléologues
 
-        <div class="carte zone-professeurs">
-            <h3 class="titre-section">Professeurs responsables</h3>
-            <div class="liste-professeurs">
-                <div class="element-prof">Benoit Tremblais</div>
-                <div class="element-prof">Vincent Verdon</div>
-            </div>
-        </div>
+Application de gestion des équipes de secours du Spéléo-Secours Français
 
-        <section>
-            <h2>Objectif</h2>
-            <p>Créer une application graphique permettant de gérer les sauveteurs spéléologues, leur planning, leurs missions et leur disponibilité, avec synchronisation pair-à-pair sur un réseau local.</p>
-        </section>
+AUTEURS
+Pape Birame Fall
+Sokhna Gueye
+Perceval Behanzin
+Mohamed Fall
 
-        <section class="carte" id="repartition-des-taches">
-            <h2 class="titre-section">Répartition des tâches</h2>
-            <div class="grille-taches">
-                <div class="element-tache">
-                    <h3>Pape Birame Fall — Gestion de la base de données & backend</h3>
-                    <ul>
-                        <li>Répartition des tâches et page html statique</li>
-                        <li>Responsable du modèle de données (couche “Modèle” du MVC)</li>
-                        <li>Écrire le script SQL : <code>script_base_de_donne.sql</code></li>
-                        <li>Créer les fonctions Python d'accès (CRUD)</li>
-                        <li>Initialiser la base (<code>sauveteurs.db</code>) depuis Python</li>
-                        <li>Gérer import/export JSON des sauveteurs</li>
-                        <li>Fournir API Python : <code>ajouter_sauveteur()</code>, <code>get_sauveteurs()</code>, etc.</li>
-                    </ul>
-                </div>
+PROFESSEURS RESPONSABLES
+Benoit Tremblais
+Vincent Verdon (client)
 
-                <div class="element-tache">
-                    <h3>Sokhna Gueye — Interface graphique PyQt (Vue)</h3>
-                    <ul>
-                        <li>Créer fenêtres PyQt6 : authentification, planning, fiche récapitulative</li>
-                        <li>Gérer interactions (boutons, menus, tableaux)</li>
-                        <li>Intégrer couleurs du planning selon statuts</li>
-                    </ul>
-                </div>
+OBJECTIF
+Créer une application graphique permettant de gérer les sauveteurs spéléologues, leur planning, leurs missions et leur disponibilité, avec synchronisation peer-to-peer sur un réseau local, on enverra seulement les données nécessaires pour les sauveteurs pas toute la base de données.
 
-                <div class="element-tache">
-                    <h3>Perceval Behanzin — Logique applicative & synchronisation (Contrôleur)</h3>
-                    <ul>
-                        <li>Connecter la base aux interfaces via le module de Pape Birame Fall</li>
-                        <li>Gérer mises à jour du planning et statuts en temps réel</li>
-                        <li>Préparer communication réseau TCP (port 5002)</li>
-                        <li>Gérer profils utilisateurs (lecture, gestionnaire, admin)</li>
-                    </ul>
-                </div>
+APPROCHE:
+Pour les accès à l'application, tous les utilisateurs peuvent voir le planning. Seuls les gestionnaires et les administrateurs doivent s'authentifier pour faire leurs tâches selon leurs profils. On a choisis ce systeme car on a s'est mis d'accord que le planning doit être visible par tous les utilisateurs et ça ne represente pas un point d'entrée pour les hackers.
+Pour la base de données, on a opté pour SQLite car c'est plus facile à mettre en place et plus proche de MySQL qu'on a deja utilisé. Cette base sera locale à chaque poste et on fera la synchronisation entre les postes via des sockets TCP. 
+Pour l'envoi des données, on a choisi le format JSON car c'est un format léger et facile à manipuler en Python. On enverra seulement les données nécessaires pour les sauveteurs modifiés, ajoutés ou supprimés. 
 
-                <div class="element-tache">
-                    <h3>Mohamed Fall — Documentation & tests</h3>
-                    <ul>
-                        <li>Mettre en place Sphinx (docs/)</li>
-                        <li>Rédiger .rst : installation, utilisation, description</li>
-                        <li>Créer tests unitaires (tests/) pour modèle et contrôleur</li>
-                    </ul>
-                </div>
-            </div>
-        </section>
 
-        <section>
-            <h2>Fonctionnalités principales</h2>
-            <ul>
-                <li>Gestion des sauveteurs et de leurs spécialités</li>
-                <li>Gestion du planning et des statuts colorés</li>   
-                <li>Interface graphique PyQt simple et claire</li>
-                <li>Synchronisation automatique entre plusieurs postes via TCP (port 5002)</li>
-                <li>Authentification par profils : gestionnaire, lecture, administration</li>
-            </ul>
-        </section>
+RÉPARTITION DES TÂCHES
+Pape Birame Fall — Gestion de la base de données
+- Répartition des tâches et page html statique pour le rapport
+- Responsable du modèle de données (MVC)
+- Écrire le script SQL : script_base_de_donne.sql
+- Créer les fonctions Python d'accès (CRUD)
+- Initialiser la base (sauveteurs.db) depuis Python
+- Gérer import/export JSON des sauveteurs
+- Fournir API Python : ajouter_sauveteur(), get_sauveteurs(),...
 
-        <section>
-            <h2>Technologies utilisées</h2>
-            <ul>
-                <li>Python 3.10+</li>
-                <li>PyQt5 pour l’interface graphique</li>
-                <li>SQLite (base locale)</li>
-                <li>Communication socket TCP</li>
-                <li>Documentation Sphinx</li>
-            </ul>
-        </section>
-    </main>
 
-    <footer>
-        <p>© 2025 - Projet SAE 302 (Gestion Sauveteurs)- IUT de Châtellerault</p>
-    </footer>
+Sokhna Gueye — Interface graphique PyQt (Vue)
+- Créer fenêtres PyQt5 : authentification, planning, fiche récapitulative
+- Gérer interactions (boutons, menus, tableaux)
+- Intégrer couleurs du planning selon statuts
+
+Perceval Behanzin — Logique applicative & synchronisation (Contrôleur)
+- Connecter la base aux interfaces PyQt
+- Gérer mises à jour du planning et statuts en temps réel
+- Préparer communication réseau TCP (port 5002)
+- Gérer profils utilisateurs (lecture, gestionnaire, admin)
+
+Mohamed Fall — Documentation & tests
+- Mettre en place Sphinx (docs/)
+- Rédiger .rst : installation, utilisation, description
+- Créer tests unitaires (tests/) pour modèle et contrôleur
+
+FONCTIONNALITÉS PRINCIPALES
+- Gestion des sauveteurs et de leurs spécialités
+- Gestion du planning et des statuts colorés
+- Interface graphique PyQt simple et claire
+- Synchronisation automatique entre plusieurs postes via TCP (port 5002)
+- Authentification par profils : gestionnaire, administration
+
+CAS D'UTILISATION
+1. Un utilisateur ouvre l'application et voit le planning sans s'authentifier.
+2. Un gestionnaire s'authentifie:
+   - Ajoute un nouveau sauveteur avec ses spécialités.
+   - Modifie le statut d'un sauveteur (disponible, en mission, indisponible).
+   - Supprime un sauveteur.
+   - Modifie le planning (horaires).
+3. Un administrateur s'authentifie:
+   - Gère les comptes utilisateurs (ajout, suppression, modification).
+   - Voir le planning complet.
+4. Lorsqu'un sauveteur est ajouté/modifié/supprimé, les autres postes reçoivent automatiquement la mise à jour via TCP.
+
+
+CONTRAINTES DU PROJET
+ - Doit fonctionner sur un réseau local sans serveur central.
+ - Utilisation de sockets TCP pour la communication.
+ - Base de données locale SQLite.
+ - Aucun accès Internet requis.
+ - Interface simple pour les utilisateurs non techniques.
+ - Depot GitHub avec structure imposée.
+
+| Risque                                | Impact               | Probabilité | Solution envisagée                     |
+| ------------------------------------- | -------------------- | ----------- | -------------------------------------- |
+| Mauvaise synchronisation entre postes | Perte de données     | Moyenne     | Vérification JSON et logs TCP          |
+| Conflits d’accès simultanés           | Incohérence base     | Faible      | Verrouillage logiciel                  |
+| Retard sur l’interface PyQt           | Retard global        | Moyenne     | Répartition de la charge entre membres |
+| Incompréhension du protocole TCP      | Problème réseau      | Faible      | Tests sur LAN avant rendu              |
+| Erreur humaine de saisie              | Données incohérentes | Moyenne     | Vérification des champs obligatoires   |
+
+
+ 
+
+TECHNOLOGIES UTILISÉES
+- Python 3
+- PyQt5 pour l’interface graphique
+- SQLite (base locale)
+- Communication socket TCP
+- Documentation Sphinx
+
+© 2025 - Projet SAE 302 - IUT de Châtellerault
+
 </body>
 </html>
