@@ -2,7 +2,7 @@ import socket
 import threading
 import json
 
-class RéseauPairÀPair:
+class pair:
     """
     Réseau peer-to-peer basique.
     Écoute sur un port donné et échange des mises à jour JSON entre machines.
@@ -21,10 +21,7 @@ class RéseauPairÀPair:
         # Lancer le serveur d’écoute
         threading.Thread(target=self._serveur, daemon=True).start()
         print(f"[Réseau] Serveur P2P démarré sur le port {self.port}")
-
-    # ------------------------------------------------------------------
     # SERVEUR : écoute les connexions entrantes
-    # ------------------------------------------------------------------
     def _serveur(self):
         serveur = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         serveur.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -44,9 +41,7 @@ class RéseauPairÀPair:
         serveur.close()
         print("[Réseau] Serveur arrêté")
 
-    # ------------------------------------------------------------------
     # CLIENT : reçoit un message d’un autre poste
-    # ------------------------------------------------------------------
     def _gerer_client(self, client):
         with client:
             try:
@@ -63,9 +58,7 @@ class RéseauPairÀPair:
             except Exception as e:
                 print(f"[Réseau] Erreur client : {e}")
 
-    # ------------------------------------------------------------------
-    # ENVOI : diffuse une mise à jour à tous les pairs
-    # ------------------------------------------------------------------
+    # ENVOI : diffuse une mise à jour à tous les pair
     def diffuser_mise_a_jour(self, mise_a_jour):
         donnees = json.dumps(mise_a_jour).encode('utf-8')
 
@@ -79,8 +72,6 @@ class RéseauPairÀPair:
             except Exception as e:
                 print(f"[Réseau] Impossible de contacter {ip} : {e}")
 
-    # ------------------------------------------------------------------
     # ARRÊT DU SERVEUR
-    # ------------------------------------------------------------------
     def arreter(self):
         self.stop_event.set()
