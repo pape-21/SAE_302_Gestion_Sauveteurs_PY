@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS sauveteur (
     prenom TEXT NOT NULL,
     departement TEXT,
     specialite TEXT NOT NULL,
-    statut_actuel TEXT DEFAULT 'disponible' 
+    statut TEXT DEFAULT 'disponible' 
     -- statuts : disponible, approche, sous_terre, gestion, exterieur, repos, civiere
 );
 
@@ -30,4 +30,4 @@ CREATE TABLE IF NOT EXISTS planning (
 
 -- Insertion d'un admin par défaut pour ne pas être bloqué
 INSERT OR IGNORE INTO utilisateur (identifiant, mot_de_passe, role) 
-VALUES ('admin', 'admin', 'administrateur');
+VALUES ('admin', 'admin', 'administrateur');                    
