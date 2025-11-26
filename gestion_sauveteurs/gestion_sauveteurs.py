@@ -1,10 +1,10 @@
 # Gestion_Sauveteur_Speleologue.py
 import sqlite3
 import json
-from gestion_sauveteurs.view.administrateur import lancer_administrateur
 from gestion_sauveteurs.connexion_réseaux import pair, charger_ips_machines
 from gestion_sauveteurs.view.login import lancer_login
-from gestion_sauveteurs.database import DatabaseManager  # <--- NOUVEL IMPORT
+from gestion_sauveteurs.database import DatabaseManager
+from gestion_sauveteurs.view.administrateur import lancer_administrateur
 
 # =============================================================================
 # 1. CONFIGURATION RÉSEAU & LOGIQUE MÉTIER
@@ -25,12 +25,12 @@ def traitement_message(message, adresse):
         _appliquer_modification_sauveteur(donnees)
     elif action == "suppression_sauveteur":
         _appliquer_suppression_sauveteur(donnees)
-    elif action == "ajout_mission":
-        _appliquer_ajout_mission(donnees)
-    elif action == "modification_mission":
-        _appliquer_modification_mission(donnees)
-    elif action == "suppression_mission":
-        _appliquer_suppression_mission(donnees)
+    elif action == "ajout_planning":  # Renommé pour coller au SQL
+        _appliquer_ajout_planning(donnees)
+    elif action == "modification_planning":
+        _appliquer_modification_planning(donnees)
+    elif action == "suppression_planning":
+        _appliquer_suppression_planning(donnees)
 
     print(f"Mise à jour reçue depuis {adresse}")
 
@@ -42,14 +42,15 @@ reseau = pair(
 print("Synchronisation réseau activée.")
 
 # =============================================================================
-# 2. WRAPPERS CRUD (Base de données)
+# 2. WRAPPERS CRUD (Base de données + Réseau)
 # =============================================================================
 
 def ajouter_sauveteur(nom, prenom, departement, specialite):
-    connexion = sqlite3.connect("data/database.db")
+    connexion = sqlite3.connect("data/sauveteurs.db") # Nom de la BDD par défaut dans DatabaseManager
     curseur = connexion.cursor()
+    # CORRECTION : table 'sauveteur' (singulier)
     curseur.execute(
-        "INSERT INTO sauveteurs (nom, prenom, departement, specialite) VALUES (?, ?, ?, ?)",
+        "INSERT INTO sauveteur (nom, prenom, departement, specialite) VALUES (?, ?, ?, ?)",
         (nom, prenom, departement, specialite)
     )
     id_nouveau = curseur.lastrowid
@@ -69,10 +70,11 @@ def ajouter_sauveteur(nom, prenom, departement, specialite):
     reseau.diffuser_mise_a_jour(message)
 
 def modifier_sauveteur(id_sauveteur, nom, prenom, departement, specialite):
-    connexion = sqlite3.connect("data/database.db")
+    connexion = sqlite3.connect("data/sauveteurs.db")
     curseur = connexion.cursor()
+    # CORRECTION : table 'sauveteur' (singulier)
     curseur.execute(
-        "UPDATE sauveteurs SET nom=?, prenom=?, departement=?, specialite=? WHERE id=?",
+        "UPDATE sauveteur SET nom=?, prenom=?, departement=?, specialite=? WHERE id=?",
         (nom, prenom, departement, specialite, id_sauveteur)
     )
     connexion.commit()
@@ -91,9 +93,10 @@ def modifier_sauveteur(id_sauveteur, nom, prenom, departement, specialite):
     reseau.diffuser_mise_a_jour(message)
 
 def supprimer_sauveteur(id_sauveteur):
-    connexion = sqlite3.connect("data/database.db")
+    connexion = sqlite3.connect("data/sauveteurs.db")
     curseur = connexion.cursor()
-    curseur.execute("DELETE FROM sauveteurs WHERE id=?", (id_sauveteur,))
+    # CORRECTION : table 'sauveteur' (singulier)
+    curseur.execute("DELETE FROM sauveteur WHERE id=?", (id_sauveteur,))
     connexion.commit()
     connexion.close()
 
@@ -103,118 +106,120 @@ def supprimer_sauveteur(id_sauveteur):
     }
     reseau.diffuser_mise_a_jour(message)
 
-def ajouter_mission(sauveteur_id, debut, fin, type_mission, preparation):
-    connexion = sqlite3.connect("data/database.db")
+# CORRECTION : Adaptation à la table 'planning' du SQL
+def ajouter_mission(sauveteur_id, debut, fin, type_mission):
+    connexion = sqlite3.connect("data/sauveteurs.db")
     curseur = connexion.cursor()
+    # Table 'planning' avec colonnes 'heure_debut', 'heure_fin', 'statut_mission'
     curseur.execute(
-        "INSERT INTO missions (sauveteur_id, debut, fin, type_mission, preparation) VALUES (?, ?, ?, ?, ?)",
-        (sauveteur_id, debut, fin, type_mission, preparation)
+        "INSERT INTO planning (sauveteur_id, heure_debut, heure_fin, statut_mission) VALUES (?, ?, ?, ?)",
+        (sauveteur_id, debut, fin, type_mission)
     )
     id_nouveau = curseur.lastrowid
     connexion.commit()
     connexion.close()
 
     message = {
-        "action": "ajout_mission",
+        "action": "ajout_planning",
         "donnees": {
             "id": id_nouveau,
             "sauveteur_id": sauveteur_id,
-            "debut": debut,
-            "fin": fin,
-            "type_mission": type_mission,
-            "preparation": preparation
+            "heure_debut": debut,
+            "heure_fin": fin,
+            "statut_mission": type_mission
         }
     }
     reseau.diffuser_mise_a_jour(message)
 
-def modifier_mission(id_mission, sauveteur_id, debut, fin, type_mission, preparation):
-    connexion = sqlite3.connect("data/database.db")
+def modifier_mission(id_mission, sauveteur_id, debut, fin, type_mission):
+    connexion = sqlite3.connect("data/sauveteurs.db")
     curseur = connexion.cursor()
     curseur.execute(
-        "UPDATE missions SET sauveteur_id=?, debut=?, fin=?, type_mission=?, preparation=? WHERE id=?",
-        (sauveteur_id, debut, fin, type_mission, preparation, id_mission)
+        "UPDATE planning SET sauveteur_id=?, heure_debut=?, heure_fin=?, statut_mission=? WHERE id=?",
+        (sauveteur_id, debut, fin, type_mission, id_mission)
     )
     connexion.commit()
     connexion.close()
 
     message = {
-        "action": "modification_mission",
+        "action": "modification_planning",
         "donnees": {
             "id": id_mission,
             "sauveteur_id": sauveteur_id,
-            "debut": debut,
-            "fin": fin,
-            "type_mission": type_mission,
-            "preparation": preparation
+            "heure_debut": debut,
+            "heure_fin": fin,
+            "statut_mission": type_mission
         }
     }
     reseau.diffuser_mise_a_jour(message)
 
 def supprimer_mission(id_mission):
-    connexion = sqlite3.connect("data/database.db")
+    connexion = sqlite3.connect("data/sauveteurs.db")
     curseur = connexion.cursor()
-    curseur.execute("DELETE FROM missions WHERE id=?", (id_mission,))
+    curseur.execute("DELETE FROM planning WHERE id=?", (id_mission,))
     connexion.commit()
     connexion.close()
 
     message = {
-        "action": "suppression_mission",
+        "action": "suppression_planning",
         "donnees": {"id": id_mission}
     }
     reseau.diffuser_mise_a_jour(message)
 
-#  FONCTIONS INTERNES POUR LES MESSAGES REÇUS
+#  FONCTIONS INTERNES POUR LES MESSAGES REÇUS (Mise à jour locale)
 def _appliquer_ajout_sauveteur(donnees):
-    connexion = sqlite3.connect("data/database.db")
+    connexion = sqlite3.connect("data/sauveteurs.db")
     curseur = connexion.cursor()
+    # Table 'sauveteur'
     curseur.execute(
-        "INSERT OR IGNORE INTO sauveteurs (id, nom, prenom, departement, specialite) VALUES (?, ?, ?, ?, ?)",
+        "INSERT OR IGNORE INTO sauveteur (id, nom, prenom, departement, specialite) VALUES (?, ?, ?, ?, ?)",
         (donnees["id"], donnees["nom"], donnees["prenom"], donnees["departement"], donnees["specialite"])
     )
     connexion.commit()
     connexion.close()
 
 def _appliquer_modification_sauveteur(donnees):
-    connexion = sqlite3.connect("data/database.db")
+    connexion = sqlite3.connect("data/sauveteurs.db")
     curseur = connexion.cursor()
     curseur.execute(
-        "UPDATE sauveteurs SET nom=?, prenom=?, departement=?, specialite=? WHERE id=?",
+        "UPDATE sauveteur SET nom=?, prenom=?, departement=?, specialite=? WHERE id=?",
         (donnees["nom"], donnees["prenom"], donnees["departement"], donnees["specialite"], donnees["id"])
     )
     connexion.commit()
     connexion.close()
 
 def _appliquer_suppression_sauveteur(donnees):
-    connexion = sqlite3.connect("data/database.db")
+    connexion = sqlite3.connect("data/sauveteurs.db")
     curseur = connexion.cursor()
-    curseur.execute("DELETE FROM sauveteurs WHERE id=?", (donnees["id"],))
+    curseur.execute("DELETE FROM sauveteur WHERE id=?", (donnees["id"],))
     connexion.commit()
     connexion.close()
 
-def _appliquer_ajout_mission(donnees):
-    connexion = sqlite3.connect("data/database.db")
+def _appliquer_ajout_planning(donnees):
+    connexion = sqlite3.connect("data/sauveteurs.db")
     curseur = connexion.cursor()
+    # Table 'planning'
     curseur.execute(
-        "INSERT OR IGNORE INTO missions (id, sauveteur_id, debut, fin, type_mission, preparation) VALUES (?, ?, ?, ?, ?, ?)",
-        (donnees["id"], donnees["sauveteur_id"], donnees["debut"], donnees["fin"], donnees["type_mission"], donnees["preparation"])
+        "INSERT OR IGNORE INTO planning (id, sauveteur_id, heure_debut, heure_fin, statut_mission) VALUES (?, ?, ?, ?, ?)",
+        (donnees["id"], donnees["sauveteur_id"], donnees["heure_debut"], donnees["heure_fin"], donnees["statut_mission"])
     )
     connexion.commit()
     connexion.close()
 
-def _appliquer_modification_mission(donnees):
-    connexion = sqlite3.connect("data/database.db")
+def _appliquer_modification_planning(donnees):
+    connexion = sqlite3.connect("data/sauveteurs.db")
     curseur = connexion.cursor()
     curseur.execute(
-        "UPDATE missions SET sauveteur_id=?, debut=?, fin=?, type_mission=?, preparation=? WHERE id=?",
-        (donnees["sauveteur_id"], donnees["debut"], donnees["fin"], donnees["type_mission"], donnees["preparation"], donnees["id"])
+        "UPDATE planning SET sauveteur_id=?, heure_debut=?, heure_fin=?, statut_mission=? WHERE id=?",
+        (donnees["sauveteur_id"], donnees["heure_debut"], donnees["heure_fin"], donnees["statut_mission"], donnees["id"])
     )
     connexion.commit()
     connexion.close()
 
-def _appliquer_suppression_mission(donnees):
-    connexion = sqlite3.connect("data/database.db")
+def _appliquer_suppression_planning(donnees):
+    connexion = sqlite3.connect("data/sauveteurs.db")
     curseur = connexion.cursor()
-    curseur.execute("DELETE FROM missions WHERE id=?", (donnees["id"],))
+    curseur.execute("DELETE FROM planning WHERE id=?", (donnees["id"],))
     connexion.commit()
     connexion.close()
 
@@ -243,7 +248,6 @@ def main():
             
         elif role_connecte == "gestionnaire":
             print("[TODO] Ouvrir la fenêtre Gestionnaire ici")
-            # lancer_gestionnaire()  <-- À créer plus tard
             
         elif role_connecte == "lecture":
             print("[TODO] Ouvrir la fenêtre Lecture Seule ici")
