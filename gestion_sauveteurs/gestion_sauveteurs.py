@@ -1,19 +1,20 @@
 # Gestion_Sauveteur_Speleologue.py
-
 import sqlite3
-from pathlib import Path
 import json
+from gestion_sauveteurs.view.administrateur import lancer_administrateur
 from gestion_sauveteurs.connexion_réseaux import pair, charger_ips_machines
+from gestion_sauveteurs.view.login import lancer_login
+from gestion_sauveteurs.database import DatabaseManager  # <--- NOUVEL IMPORT
 
+# =============================================================================
+# 1. CONFIGURATION RÉSEAU & LOGIQUE MÉTIER
+# =============================================================================
 
-
-
-#  CONFIGURATION RÉSEAU
 liste_machines = charger_ips_machines()
 if not liste_machines:
-    print(" Aucune machine distante définie dans config.json")
+    print("Aucune machine distante définie dans config.json (Mode local uniquement)")
 
-#  CALLBACK : applique les modifications reçues d'autres machine
+# CALLBACK : applique les modifications reçues d'autres machines
 def traitement_message(message, adresse):
     action = message.get("action")
     donnees = message.get("donnees")
@@ -33,15 +34,16 @@ def traitement_message(message, adresse):
 
     print(f"Mise à jour reçue depuis {adresse}")
 
-#  CRÉATION DU RÉSEAU
+# CRÉATION DU RÉSEAU
 reseau = pair(
-    machines=liste_machines,
+    liste_machines=liste_machines,
     fonction_mise_a_jour=traitement_message
 )
-
 print("Synchronisation réseau activée.")
 
-#  WRAPPERS CRUD + DIFFUSION AUTOMATIQUE
+# =============================================================================
+# 2. WRAPPERS CRUD (Base de données)
+# =============================================================================
 
 def ajouter_sauveteur(nom, prenom, departement, specialite):
     connexion = sqlite3.connect("data/database.db")
@@ -101,7 +103,6 @@ def supprimer_sauveteur(id_sauveteur):
     }
     reseau.diffuser_mise_a_jour(message)
 
-# Mêmes wrappers pour les missions
 def ajouter_mission(sauveteur_id, debut, fin, type_mission, preparation):
     connexion = sqlite3.connect("data/database.db")
     curseur = connexion.cursor()
@@ -216,3 +217,39 @@ def _appliquer_suppression_mission(donnees):
     curseur.execute("DELETE FROM missions WHERE id=?", (donnees["id"],))
     connexion.commit()
     connexion.close()
+
+# =============================================================================
+# 3. POINT D'ENTRÉE PRINCIPAL (MAIN)
+# =============================================================================
+
+def main():
+    print("--- Démarrage de l'application ---")
+    
+    # 1. Init BDD
+    print("[APP] Vérification de la base de données...")
+    db_manager = DatabaseManager()
+    db_manager.initialiser()
+    
+    # 2. Login (Bloquant)
+    print("[APP] Ouverture du login...")
+    role_connecte = lancer_login()
+
+    # 3. Navigation selon le rôle récupéré
+    if role_connecte:
+        print(f"[APP] Utilisateur connecté : {role_connecte}")
+        
+        if role_connecte == "administrateur":
+            lancer_administrateur()
+            
+        elif role_connecte == "gestionnaire":
+            print("[TODO] Ouvrir la fenêtre Gestionnaire ici")
+            # lancer_gestionnaire()  <-- À créer plus tard
+            
+        elif role_connecte == "lecture":
+            print("[TODO] Ouvrir la fenêtre Lecture Seule ici")
+            
+    else:
+        print("[APP] Aucune connexion (Fermeture).")
+
+if __name__ == "__main__":
+    main()
