@@ -12,7 +12,6 @@ def main():
     print("1. Lancement de l'initialisation...")
     db_manager.initialiser()
 
-    # 3. Test rapide : Est-ce qu'on peut écrire dedans ?
     print("\n2. Test d'insertion d'un sauveteur...")
     conn = db_manager.get_connection()
     cursor = conn.cursor()

@@ -25,6 +25,7 @@ def charger_ips_machines():
         return []
 
 class pair:
+    
     """
     Réseau peer-to-peer basique.
     Écoute sur un port donné et échange des mises à jour JSON entre machines.
@@ -97,7 +98,7 @@ class pair:
 
         for ip in self.machines:
             try:
-                print(f"[RESEAU] Envoi vers {ip}...")
+                print(f"Envoi vers {ip}...")
                 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 sock.settimeout(2)
                 sock.connect((ip, self.port))

@@ -73,8 +73,9 @@
                     <li>Création du script SQL : <code>script_base_de_donne.sql</code></li>
                     <li>Modèle de données (MVC)</li>
                     <li>Fonctions Python d’accès (CRUD)</li>
-                    <li>Initialisation de la base (<code>sauveteurs.db</code>) depuis Python</li>
-                    <li>Import/export JSON des sauveteurs</li>
+                    <li>Liaison entre l'interface graphique et la base de données</li>
+                    <li>Initialisation de la base depuis Python</li>
+                    <li>Import/export JSON des sauveteurs en créant les messages lors de chaque modification</li>
                     <li>API Python : <code>ajouter_sauveteur()</code>, <code>get_sauveteurs()</code>, etc.</li>
                 </ul>
             </article>
@@ -100,19 +101,17 @@
 
             <article class="element-tache">
                 <h3>Mohamed Fall — Documentation & tests</h3>
-                <ul>
+                    <li>Création des interfaces graphiques (toutes) pour le profil gestionnaire</li>
                     <li>Mise en place de Sphinx (dossier <code>docs/</code>)</li>
-                    <li>Rédaction des fichiers <code>.rst</code> (installation, utilisation, architecture)</li>
                     <li>Création de tests unitaires (<code>tests/</code>) pour le modèle et le contrôleur</li>
                     <li>Maintien de <code>requirements.txt</code> et <code>AUTHORS</code></li>
-                    <li>Gestion du flux GitHub : branches, pull requests, merges</li>
+                    <li>Gestion du flux GitHub : branches, pull requests</li>
                 </ul>
             </article>
         </section>
 
         <section id="planning" class="carte">
             <h2>Planning prévisionnel</h2>
-            <ol>
                 <li>Conception du modèle de données et script SQL</li>
                 <li>Développement de l’interface PyQt et liaison base</li>
                 <li>Implémentation de la communication TCP</li>

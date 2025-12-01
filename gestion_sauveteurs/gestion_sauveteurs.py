@@ -1,4 +1,3 @@
-# Gestion_Sauveteur_Speleologue.py
 import sqlite3
 import json
 from pathlib import Path
