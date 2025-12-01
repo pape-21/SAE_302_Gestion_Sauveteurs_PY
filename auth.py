@@ -1,20 +1,21 @@
 import sqlite3
+from pathlib import Path
 
-FICHIER_BD = "planning.db"
+base = Path("data/database.db")
 
 def se_connecter():
     """Demande les identifiants et renvoie le profil de l'utilisateur"""
-    nom_utilisateur = input("Nom d'utilisateur : ").strip()
+    identifiant = input("Nom d'utilisateur : ").strip()
     mot_de_passe = input("Mot de passe : ").strip()
 
     # connexion à la base de données
-    connexion = sqlite3.connect(FICHIER_BD)
+    connexion = sqlite3.connect(base)
     curseur = connexion.cursor()
 
     # rechercher le profil correspondant
     curseur.execute(
-        "SELECT profil FROM utilisateurs WHERE nom_utilisateur=? AND mot_de_passe=?",
-        (nom_utilisateur, mot_de_passe)
+        "SELECT profil FROM utilisateur WHERE identifiant=? AND mot_de_passe=?",
+        (identifiant, mot_de_passe)
     )
     resultat = curseur.fetchone()
     connexion.close()
