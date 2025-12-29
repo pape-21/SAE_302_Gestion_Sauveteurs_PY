@@ -231,32 +231,32 @@ def _appliquer_suppression_planning(donnees):
 # =============================================================================
 
 def main():
-    print("--- Démarrage de l'application ---")
+    print("Démarrage de l'application ---")
     
     # 1. Init BDD
-    print("[APP] Vérification de la base de données...")
+    print(" érification de la base de données...")
     db_manager = DatabaseManager()
     db_manager.initialiser()
     
     # 2. Login (Bloquant)
-    print("[APP] Ouverture du login...")
+    print("Ouverture du login...")
     role_connecte = lancer_login()
 
     # 3. Navigation selon le rôle récupéré
     if role_connecte:
-        print(f"[APP] Utilisateur connecté : {role_connecte}")
+        print(f"Utilisateur connecté : {role_connecte}")
         
         if role_connecte == "administrateur":
             lancer_administrateur()
             
         elif role_connecte == "gestionnaire":
-            print("[TODO] Ouvrir la fenêtre Gestionnaire ici")
+            print("Ouvrir la fenêtre Gestionnaire ici")
             
         elif role_connecte == "lecture":
-            print("[TODO] Ouvrir la fenêtre Lecture Seule ici")
+            print("Ouvrir la fenêtre Lecture Seule ici")
             
     else:
-        print("[APP] Aucune connexion (Fermeture).")
+        print("Aucune connexion (Fermeture).")
 
 if __name__ == "__main__":
     main()
