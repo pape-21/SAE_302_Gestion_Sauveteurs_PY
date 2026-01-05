@@ -6,15 +6,16 @@ from gestion_sauveteurs.view.login import lancer_login
 from gestion_sauveteurs.database import DatabaseManager
 from gestion_sauveteurs.view.administrateur import lancer_administrateur
 
+# =============================================================================
+# CONFIGURATION
+# =============================================================================
 
-
-# Chemin vers la base de données (fichier 'data/application.db' à la racine du dépôt)
-base_de_donnee = Path("/data/application.db")
+# Chemin relatif simple vers la base de données
+db_path = "../data/application.db"
 
 # =============================================================================
 # 1. CONFIGURATION RÉSEAU & LOGIQUE MÉTIER
 # =============================================================================
-
 
 liste_machines = charger_ips_machines()
 if not liste_machines:
@@ -49,9 +50,9 @@ print("Synchronisation réseau activée.")
 
 
 def ajouter_sauveteur(nom, prenom, departement, specialite):
-    connexion = sqlite3.connect({base_de_donnee}) 
+    # Correction : utilisation directe de la variable db_path
+    connexion = sqlite3.connect(db_path) 
     curseur = connexion.cursor()
-    # CORRECTION : table 'sauveteur' (singulier)
     curseur.execute(
         "INSERT INTO sauveteur (nom, prenom, departement, specialite) VALUES (?, ?, ?, ?)",
         (nom, prenom, departement, specialite)
@@ -73,9 +74,8 @@ def ajouter_sauveteur(nom, prenom, departement, specialite):
     reseau.diffuser_mise_a_jour(message)
 
 def modifier_sauveteur(id_sauveteur, nom, prenom, departement, specialite):
-    connexion = sqlite3.connect({base_de_donnee})
+    connexion = sqlite3.connect(db_path)
     curseur = connexion.cursor()
-    # CORRECTION : table 'sauveteur' (singulier)
     curseur.execute(
         "UPDATE sauveteur SET nom=?, prenom=?, departement=?, specialite=? WHERE id=?",
         (nom, prenom, departement, specialite, id_sauveteur)
@@ -96,9 +96,8 @@ def modifier_sauveteur(id_sauveteur, nom, prenom, departement, specialite):
     reseau.diffuser_mise_a_jour(message)
 
 def supprimer_sauveteur(id_sauveteur):
-    connexion = sqlite3.connect("{base_de_donnee}")
+    connexion = sqlite3.connect(db_path)
     curseur = connexion.cursor()
-    # CORRECTION : table 'sauveteur' (singulier)
     curseur.execute("DELETE FROM sauveteur WHERE id=?", (id_sauveteur,))
     connexion.commit()
     connexion.close()
@@ -109,11 +108,9 @@ def supprimer_sauveteur(id_sauveteur):
     }
     reseau.diffuser_mise_a_jour(message)
 
-# CORRECTION : Adaptation à la table 'planning' du SQL
 def ajouter_mission(sauveteur_id, debut, fin, type_mission):
-    connexion = sqlite3.connect({base_de_donnee})
+    connexion = sqlite3.connect(db_path)
     curseur = connexion.cursor()
-    # Table 'planning' avec colonnes 'heure_debut', 'heure_fin', 'statut_mission'
     curseur.execute(
         "INSERT INTO planning (sauveteur_id, heure_debut, heure_fin, statut_mission) VALUES (?, ?, ?, ?)",
         (sauveteur_id, debut, fin, type_mission)
@@ -135,7 +132,7 @@ def ajouter_mission(sauveteur_id, debut, fin, type_mission):
     reseau.diffuser_mise_a_jour(message)
 
 def modifier_mission(id_mission, sauveteur_id, debut, fin, type_mission):
-    connexion = sqlite3.connect({base_de_donnee})
+    connexion = sqlite3.connect(db_path)
     curseur = connexion.cursor()
     curseur.execute(
         "UPDATE planning SET sauveteur_id=?, heure_debut=?, heure_fin=?, statut_mission=? WHERE id=?",
@@ -157,7 +154,7 @@ def modifier_mission(id_mission, sauveteur_id, debut, fin, type_mission):
     reseau.diffuser_mise_a_jour(message)
 
 def supprimer_mission(id_mission):
-    connexion = sqlite3.connect({base_de_donnee})
+    connexion = sqlite3.connect(db_path)
     curseur = connexion.cursor()
     curseur.execute("DELETE FROM planning WHERE id=?", (id_mission,))
     connexion.commit()
@@ -171,9 +168,8 @@ def supprimer_mission(id_mission):
 
 #  FONCTIONS INTERNES POUR LES MESSAGES REÇUS (Mise à jour locale)
 def _appliquer_ajout_sauveteur(donnees):
-    connexion = sqlite3.connect({base_de_donnee})
+    connexion = sqlite3.connect(db_path)
     curseur = connexion.cursor()
-    # Table 'sauveteur'
     curseur.execute(
         "INSERT OR IGNORE INTO sauveteur (id, nom, prenom, departement, specialite) VALUES (?, ?, ?, ?, ?)",
         (donnees["id"], donnees["nom"], donnees["prenom"], donnees["departement"], donnees["specialite"])
@@ -182,7 +178,7 @@ def _appliquer_ajout_sauveteur(donnees):
     connexion.close()
 
 def _appliquer_modification_sauveteur(donnees):
-    connexion = sqlite3.connect({base_de_donnee})
+    connexion = sqlite3.connect(db_path)
     curseur = connexion.cursor()
     curseur.execute(
         "UPDATE sauveteur SET nom=?, prenom=?, departement=?, specialite=? WHERE id=?",
@@ -192,16 +188,15 @@ def _appliquer_modification_sauveteur(donnees):
     connexion.close()
 
 def _appliquer_suppression_sauveteur(donnees):
-    connexion = sqlite3.connect({base_de_donnee})
+    connexion = sqlite3.connect(db_path)
     curseur = connexion.cursor()
     curseur.execute("DELETE FROM sauveteur WHERE id=?", (donnees["id"],))
     connexion.commit()
     connexion.close()
 
 def _appliquer_ajout_planning(donnees):
-    connexion = sqlite3.connect({base_de_donnee})
+    connexion = sqlite3.connect(db_path)
     curseur = connexion.cursor()
-    # Table 'planning'
     curseur.execute(
         "INSERT OR IGNORE INTO planning (id, sauveteur_id, heure_debut, heure_fin, statut_mission) VALUES (?, ?, ?, ?, ?)",
         (donnees["id"], donnees["sauveteur_id"], donnees["heure_debut"], donnees["heure_fin"], donnees["statut_mission"])
@@ -210,7 +205,7 @@ def _appliquer_ajout_planning(donnees):
     connexion.close()
 
 def _appliquer_modification_planning(donnees):
-    connexion = sqlite3.connect({base_de_donnee})
+    connexion = sqlite3.connect(db_path)
     curseur = connexion.cursor()
     curseur.execute(
         "UPDATE planning SET sauveteur_id=?, heure_debut=?, heure_fin=?, statut_mission=? WHERE id=?",
@@ -220,7 +215,7 @@ def _appliquer_modification_planning(donnees):
     connexion.close()
 
 def _appliquer_suppression_planning(donnees):
-    connexion = sqlite3.connect({base_de_donnee})
+    connexion = sqlite3.connect(db_path)
     curseur = connexion.cursor()
     curseur.execute("DELETE FROM planning WHERE id=?", (donnees["id"],))
     connexion.commit()
@@ -234,7 +229,7 @@ def main():
     print("Démarrage de l'application ---")
     
     # 1. Init BDD
-    print(" érification de la base de données...")
+    print("Vérification de la base de données...")
     db_manager = DatabaseManager()
     db_manager.initialiser()
     
