@@ -1,116 +1,435 @@
-
 <!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
-
-    <title>Welcome to Application graphique de gestion des sauveteurs spéléologues’s documentation! &#8212; Application graphique de gestion des sauveteurs spéléologues 0.1 documentation</title>
-    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
-    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-    <script src="_static/jquery.js"></script>
-    <script src="_static/underscore.js"></script>
-    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="_static/doctools.js"></script>
-    <script src="_static/sphinx_highlight.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bienvenue dans la documentation de Gestion Sauveteurs ! &mdash; Application graphique de gestion des sauveteurs spéléologues 0.1 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
-   
-  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
-  
-  
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
 
-  </head><body>
-  
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
 
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
           
+          
+          <a href="#" class="icon icon-home">
+            Application graphique de gestion des sauveteurs spéléologues
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">Bienvenue dans la documentation de Gestion Sauveteurs !</a><ul>
+<li><a class="reference internal" href="#module-crud-base-de-donnees">Module CRUD (Base de données)</a><ul>
+<li><a class="reference internal" href="#module-gestion_sauveteurs.crud.sauveteur">Gestion des Sauveteurs</a><ul>
+<li><a class="reference internal" href="#gestion_sauveteurs.crud.sauveteur.NOTIFIER_RESEAU"><code class="docutils literal notranslate"><span class="pre">NOTIFIER_RESEAU()</span></code></a></li>
+<li><a class="reference internal" href="#gestion_sauveteurs.crud.sauveteur.SauveteurCRUD"><code class="docutils literal notranslate"><span class="pre">SauveteurCRUD</span></code></a><ul>
+<li><a class="reference internal" href="#gestion_sauveteurs.crud.sauveteur.SauveteurCRUD.__init__"><code class="docutils literal notranslate"><span class="pre">SauveteurCRUD.__init__()</span></code></a></li>
+<li><a class="reference internal" href="#gestion_sauveteurs.crud.sauveteur.SauveteurCRUD.ajouter"><code class="docutils literal notranslate"><span class="pre">SauveteurCRUD.ajouter()</span></code></a></li>
+<li><a class="reference internal" href="#gestion_sauveteurs.crud.sauveteur.SauveteurCRUD.get_tous"><code class="docutils literal notranslate"><span class="pre">SauveteurCRUD.get_tous()</span></code></a></li>
+<li><a class="reference internal" href="#gestion_sauveteurs.crud.sauveteur.SauveteurCRUD.supprimer"><code class="docutils literal notranslate"><span class="pre">SauveteurCRUD.supprimer()</span></code></a></li>
+<li><a class="reference internal" href="#gestion_sauveteurs.crud.sauveteur.SauveteurCRUD.update_statut"><code class="docutils literal notranslate"><span class="pre">SauveteurCRUD.update_statut()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-gestion_sauveteurs.crud.planning">Gestion du Planning</a><ul>
+<li><a class="reference internal" href="#gestion_sauveteurs.crud.planning.PlanningCRUD"><code class="docutils literal notranslate"><span class="pre">PlanningCRUD</span></code></a><ul>
+<li><a class="reference internal" href="#gestion_sauveteurs.crud.planning.PlanningCRUD.__init__"><code class="docutils literal notranslate"><span class="pre">PlanningCRUD.__init__()</span></code></a></li>
+<li><a class="reference internal" href="#gestion_sauveteurs.crud.planning.PlanningCRUD.ajouter_mission"><code class="docutils literal notranslate"><span class="pre">PlanningCRUD.ajouter_mission()</span></code></a></li>
+<li><a class="reference internal" href="#gestion_sauveteurs.crud.planning.PlanningCRUD.get_planning_global"><code class="docutils literal notranslate"><span class="pre">PlanningCRUD.get_planning_global()</span></code></a></li>
+<li><a class="reference internal" href="#gestion_sauveteurs.crud.planning.PlanningCRUD.get_tous_details"><code class="docutils literal notranslate"><span class="pre">PlanningCRUD.get_tous_details()</span></code></a></li>
+<li><a class="reference internal" href="#gestion_sauveteurs.crud.planning.PlanningCRUD.supprimer_mission"><code class="docutils literal notranslate"><span class="pre">PlanningCRUD.supprimer_mission()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-gestion_sauveteurs.crud.utilisateur">Gestion des Utilisateurs</a><ul>
+<li><a class="reference internal" href="#gestion_sauveteurs.crud.utilisateur.UtilisateurCRUD"><code class="docutils literal notranslate"><span class="pre">UtilisateurCRUD</span></code></a><ul>
+<li><a class="reference internal" href="#gestion_sauveteurs.crud.utilisateur.UtilisateurCRUD.__init__"><code class="docutils literal notranslate"><span class="pre">UtilisateurCRUD.__init__()</span></code></a></li>
+<li><a class="reference internal" href="#gestion_sauveteurs.crud.utilisateur.UtilisateurCRUD.ajouter_utilisateur"><code class="docutils literal notranslate"><span class="pre">UtilisateurCRUD.ajouter_utilisateur()</span></code></a></li>
+<li><a class="reference internal" href="#gestion_sauveteurs.crud.utilisateur.UtilisateurCRUD.get_tous"><code class="docutils literal notranslate"><span class="pre">UtilisateurCRUD.get_tous()</span></code></a></li>
+<li><a class="reference internal" href="#gestion_sauveteurs.crud.utilisateur.UtilisateurCRUD.supprimer"><code class="docutils literal notranslate"><span class="pre">UtilisateurCRUD.supprimer()</span></code></a></li>
+<li><a class="reference internal" href="#gestion_sauveteurs.crud.utilisateur.UtilisateurCRUD.verifier_connexion"><code class="docutils literal notranslate"><span class="pre">UtilisateurCRUD.verifier_connexion()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#indices-et-tables">Indices et Tables</a></li>
+</ul>
+</li>
+</ul>
+</div>
+        </div>
+      </div>
+    </nav>
 
-          <div class="body" role="main">
-            
-  <section id="welcome-to-application-graphique-de-gestion-des-sauveteurs-speleologues-s-documentation">
-<h1>Welcome to Application graphique de gestion des sauveteurs spéléologues’s documentation!<a class="headerlink" href="#welcome-to-application-graphique-de-gestion-des-sauveteurs-speleologues-s-documentation" title="Permalink to this heading">¶</a></h1>
-<section id="documentation-du-code">
-<h2>Documentation du code<a class="headerlink" href="#documentation-du-code" title="Permalink to this heading">¶</a></h2>
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">Application graphique de gestion des sauveteurs spéléologues</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Bienvenue dans la documentation de Gestion Sauveteurs !</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="bienvenue-dans-la-documentation-de-gestion-sauveteurs">
+<h1>Bienvenue dans la documentation de Gestion Sauveteurs !<a class="headerlink" href="#bienvenue-dans-la-documentation-de-gestion-sauveteurs" title="Permalink to this heading"></a></h1>
+<p>Cette documentation détaille le fonctionnement technique de l’application,
+notamment les interactions avec la base de données (CRUD).</p>
 <div class="toctree-wrapper compound">
 </div>
+<section id="module-crud-base-de-donnees">
+<h2>Module CRUD (Base de données)<a class="headerlink" href="#module-crud-base-de-donnees" title="Permalink to this heading"></a></h2>
+<p>Cette partie gère toutes les communications avec la base de données SQLite.</p>
+<section id="module-gestion_sauveteurs.crud.sauveteur">
+<span id="gestion-des-sauveteurs"></span><h3>Gestion des Sauveteurs<a class="headerlink" href="#module-gestion_sauveteurs.crud.sauveteur" title="Permalink to this heading"></a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="gestion_sauveteurs.crud.sauveteur.NOTIFIER_RESEAU">
+<span class="sig-prename descclassname"><span class="pre">gestion_sauveteurs.crud.sauveteur.</span></span><span class="sig-name descname"><span class="pre">NOTIFIER_RESEAU</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">payload</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gestion_sauveteurs/crud/sauveteur.html#NOTIFIER_RESEAU"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gestion_sauveteurs.crud.sauveteur.NOTIFIER_RESEAU" title="Permalink to this definition"></a></dt>
+<dd><p>Fonction placeholder pour simuler l’envoi réseau.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>payload</strong> (<em>str</em>) – Le message JSON à envoyer.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="gestion_sauveteurs.crud.sauveteur.SauveteurCRUD">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gestion_sauveteurs.crud.sauveteur.</span></span><span class="sig-name descname"><span class="pre">SauveteurCRUD</span></span><a class="reference internal" href="_modules/gestion_sauveteurs/crud/sauveteur.html#SauveteurCRUD"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gestion_sauveteurs.crud.sauveteur.SauveteurCRUD" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Classe de gestion des opérations CRUD pour les sauveteurs.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="gestion_sauveteurs.crud.sauveteur.SauveteurCRUD.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gestion_sauveteurs/crud/sauveteur.html#SauveteurCRUD.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gestion_sauveteurs.crud.sauveteur.SauveteurCRUD.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Initialise le gestionnaire de base de données.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gestion_sauveteurs.crud.sauveteur.SauveteurCRUD.ajouter">
+<span class="sig-name descname"><span class="pre">ajouter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nom</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prenom</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">departement</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">specialite</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gestion_sauveteurs/crud/sauveteur.html#SauveteurCRUD.ajouter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gestion_sauveteurs.crud.sauveteur.SauveteurCRUD.ajouter" title="Permalink to this definition"></a></dt>
+<dd><p>Ajoute un nouveau sauveteur.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nom</strong> (<em>str</em>) – Le nom du sauveteur.</p></li>
+<li><p><strong>prenom</strong> (<em>str</em>) – Le prénom du sauveteur.</p></li>
+<li><p><strong>departement</strong> (<em>str</em>) – Le département (ex: ‘75’).</p></li>
+<li><p><strong>specialite</strong> (<em>str</em>) – La spécialité (ex: ‘Plongée’).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>L’ID du sauveteur créé, ou None en cas d’erreur.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gestion_sauveteurs.crud.sauveteur.SauveteurCRUD.get_tous">
+<span class="sig-name descname"><span class="pre">get_tous</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gestion_sauveteurs/crud/sauveteur.html#SauveteurCRUD.get_tous"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gestion_sauveteurs.crud.sauveteur.SauveteurCRUD.get_tous" title="Permalink to this definition"></a></dt>
+<dd><p>Récupère tous les sauveteurs de la base de données.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Une liste de dictionnaires contenant les infos des sauveteurs.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list[dict]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gestion_sauveteurs.crud.sauveteur.SauveteurCRUD.supprimer">
+<span class="sig-name descname"><span class="pre">supprimer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id_sauveteur</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gestion_sauveteurs/crud/sauveteur.html#SauveteurCRUD.supprimer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gestion_sauveteurs.crud.sauveteur.SauveteurCRUD.supprimer" title="Permalink to this definition"></a></dt>
+<dd><p>Supprime un sauveteur par son ID.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>id_sauveteur</strong> (<em>int</em><em> | </em><em>str</em>) – L’identifiant du sauveteur à supprimer.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True si la suppression a réussi, False sinon.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gestion_sauveteurs.crud.sauveteur.SauveteurCRUD.update_statut">
+<span class="sig-name descname"><span class="pre">update_statut</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id_sauveteur</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nouveau_statut</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gestion_sauveteurs/crud/sauveteur.html#SauveteurCRUD.update_statut"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gestion_sauveteurs.crud.sauveteur.SauveteurCRUD.update_statut" title="Permalink to this definition"></a></dt>
+<dd><p>Met à jour le statut et notifie le réseau.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>id_sauveteur</strong> (<em>int</em><em> | </em><em>str</em>) – L’ID du sauveteur.</p></li>
+<li><p><strong>nouveau_statut</strong> (<em>str</em>) – Le nouveau statut (ex: ‘en mission’).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True si la mise à jour a réussi, False sinon.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-gestion_sauveteurs.crud.planning">
+<span id="gestion-du-planning"></span><h3>Gestion du Planning<a class="headerlink" href="#module-gestion_sauveteurs.crud.planning" title="Permalink to this heading"></a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="gestion_sauveteurs.crud.planning.PlanningCRUD">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gestion_sauveteurs.crud.planning.</span></span><span class="sig-name descname"><span class="pre">PlanningCRUD</span></span><a class="reference internal" href="_modules/gestion_sauveteurs/crud/planning.html#PlanningCRUD"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gestion_sauveteurs.crud.planning.PlanningCRUD" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Classe de gestion des opérations CRUD pour le planning (missions).</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="gestion_sauveteurs.crud.planning.PlanningCRUD.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gestion_sauveteurs/crud/planning.html#PlanningCRUD.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gestion_sauveteurs.crud.planning.PlanningCRUD.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Initialise le gestionnaire de base de données.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gestion_sauveteurs.crud.planning.PlanningCRUD.ajouter_mission">
+<span class="sig-name descname"><span class="pre">ajouter_mission</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sauveteur_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">heure_debut</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">heure_fin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mission</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gestion_sauveteurs/crud/planning.html#PlanningCRUD.ajouter_mission"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gestion_sauveteurs.crud.planning.PlanningCRUD.ajouter_mission" title="Permalink to this definition"></a></dt>
+<dd><p>Ajoute une mission au planning.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sauveteur_id</strong> (<em>int</em>) – L’ID du sauveteur concerné.</p></li>
+<li><p><strong>heure_debut</strong> (<em>str</em>) – Date/Heure de début (ISO format).</p></li>
+<li><p><strong>heure_fin</strong> (<em>str</em>) – Date/Heure de fin (ISO format).</p></li>
+<li><p><strong>mission</strong> (<em>str</em>) – Description de la mission.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>L’ID de la mission créée ou None.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gestion_sauveteurs.crud.planning.PlanningCRUD.get_planning_global">
+<span class="sig-name descname"><span class="pre">get_planning_global</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">date_operation</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gestion_sauveteurs/crud/planning.html#PlanningCRUD.get_planning_global"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gestion_sauveteurs.crud.planning.PlanningCRUD.get_planning_global" title="Permalink to this definition"></a></dt>
+<dd><p>Récupère les missions pour une date donnée.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>date_operation</strong> (<em>str</em>) – La date au format ‘YYYY-MM-DD’.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Liste des missions avec détails du sauveteur.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[dict]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gestion_sauveteurs.crud.planning.PlanningCRUD.get_tous_details">
+<span class="sig-name descname"><span class="pre">get_tous_details</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gestion_sauveteurs/crud/planning.html#PlanningCRUD.get_tous_details"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gestion_sauveteurs.crud.planning.PlanningCRUD.get_tous_details" title="Permalink to this definition"></a></dt>
+<dd><p>Récupère le planning complet avec les détails des sauveteurs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Liste de tuples (id, nom_sauveteur, debut, fin, statut).</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list[tuple]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gestion_sauveteurs.crud.planning.PlanningCRUD.supprimer_mission">
+<span class="sig-name descname"><span class="pre">supprimer_mission</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id_mission</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gestion_sauveteurs/crud/planning.html#PlanningCRUD.supprimer_mission"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gestion_sauveteurs.crud.planning.PlanningCRUD.supprimer_mission" title="Permalink to this definition"></a></dt>
+<dd><p>Supprime une mission du planning.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>id_mission</strong> (<em>int</em><em> | </em><em>str</em>) – L’ID de la mission à supprimer.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True si la suppression a réussi, False sinon.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-gestion_sauveteurs.crud.utilisateur">
+<span id="gestion-des-utilisateurs"></span><h3>Gestion des Utilisateurs<a class="headerlink" href="#module-gestion_sauveteurs.crud.utilisateur" title="Permalink to this heading"></a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="gestion_sauveteurs.crud.utilisateur.UtilisateurCRUD">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gestion_sauveteurs.crud.utilisateur.</span></span><span class="sig-name descname"><span class="pre">UtilisateurCRUD</span></span><a class="reference internal" href="_modules/gestion_sauveteurs/crud/utilisateur.html#UtilisateurCRUD"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gestion_sauveteurs.crud.utilisateur.UtilisateurCRUD" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Classe de gestion des utilisateurs (Authentification et CRUD).</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="gestion_sauveteurs.crud.utilisateur.UtilisateurCRUD.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gestion_sauveteurs/crud/utilisateur.html#UtilisateurCRUD.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gestion_sauveteurs.crud.utilisateur.UtilisateurCRUD.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Initialise le gestionnaire de base de données.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gestion_sauveteurs.crud.utilisateur.UtilisateurCRUD.ajouter_utilisateur">
+<span class="sig-name descname"><span class="pre">ajouter_utilisateur</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">identifiant</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mot_de_passe</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">role</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gestion_sauveteurs/crud/utilisateur.html#UtilisateurCRUD.ajouter_utilisateur"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gestion_sauveteurs.crud.utilisateur.UtilisateurCRUD.ajouter_utilisateur" title="Permalink to this definition"></a></dt>
+<dd><p>Ajoute un nouvel utilisateur.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>identifiant</strong> (<em>str</em>) – Le login souhaité.</p></li>
+<li><p><strong>mot_de_passe</strong> (<em>str</em>) – Le mot de passe.</p></li>
+<li><p><strong>role</strong> (<em>str</em>) – Le rôle (‘administrateur’, ‘gestionnaire’, ‘lecture’).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True si l’ajout a réussi, False sinon (ex: doublon).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gestion_sauveteurs.crud.utilisateur.UtilisateurCRUD.get_tous">
+<span class="sig-name descname"><span class="pre">get_tous</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gestion_sauveteurs/crud/utilisateur.html#UtilisateurCRUD.get_tous"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gestion_sauveteurs.crud.utilisateur.UtilisateurCRUD.get_tous" title="Permalink to this definition"></a></dt>
+<dd><p>Récupère la liste de tous les utilisateurs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Une liste de dictionnaires représentant les utilisateurs.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list[dict]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gestion_sauveteurs.crud.utilisateur.UtilisateurCRUD.supprimer">
+<span class="sig-name descname"><span class="pre">supprimer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">identifiant</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gestion_sauveteurs/crud/utilisateur.html#UtilisateurCRUD.supprimer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gestion_sauveteurs.crud.utilisateur.UtilisateurCRUD.supprimer" title="Permalink to this definition"></a></dt>
+<dd><p>Supprime un utilisateur.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>identifiant</strong> (<em>str</em>) – L’identifiant de l’utilisateur à supprimer.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True si la suppression a réussi, False sinon.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gestion_sauveteurs.crud.utilisateur.UtilisateurCRUD.verifier_connexion">
+<span class="sig-name descname"><span class="pre">verifier_connexion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">identifiant_saisi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mdp_saisi</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gestion_sauveteurs/crud/utilisateur.html#UtilisateurCRUD.verifier_connexion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gestion_sauveteurs.crud.utilisateur.UtilisateurCRUD.verifier_connexion" title="Permalink to this definition"></a></dt>
+<dd><p>Vérifie les identifiants pour la connexion.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>identifiant_saisi</strong> (<em>str</em>) – L’identifiant utilisateur.</p></li>
+<li><p><strong>mdp_saisi</strong> (<em>str</em>) – Le mot de passe utilisateur.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Le rôle de l’utilisateur (‘administrateur’, etc.) ou None si échec.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 </section>
-<section id="indices-and-tables">
-<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this heading">¶</a></h1>
+<section id="indices-et-tables">
+<h2>Indices et Tables<a class="headerlink" href="#indices-et-tables" title="Permalink to this heading"></a></h2>
 <ul class="simple">
 <li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
 <li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
 <li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
 </ul>
 </section>
+</section>
 
 
+           </div>
           </div>
-          
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Pape Birame Fall, Mohamed Fall, Perceval Behanzin, Sokhna Gueye.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-<h1 class="logo"><a href="#">Application graphique de gestion des sauveteurs spéléologues</a></h1>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
 
-
-
-
-
-
-
-
-<h3>Navigation</h3>
-
-<div class="relations">
-<h3>Related Topics</h3>
-<ul>
-  <li><a href="#">Documentation overview</a><ul>
-  </ul></li>
-</ul>
-</div>
-<div id="searchbox" style="display: none" role="search">
-  <h3 id="searchlabel">Quick search</h3>
-    <div class="searchformwrapper">
-    <form class="search" action="search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
-      <input type="submit" value="Go" />
-    </form>
-    </div>
-</div>
-<script>document.getElementById('searchbox').style.display = "block"</script>
-
-
-
-
-
-
-
-
-        </div>
-      </div>
-      <div class="clearer"></div>
-    </div>
-    <div class="footer">
-      &copy;2025, Pape Birame Fall, Mohamed Fall, Perceval Behanzin, Sokhna Gueye.
-      
-      |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.3.0</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
-      
-      |
-      <a href="_sources/index.rst.txt"
-          rel="nofollow">Page source</a>
-    </div>
-
-    
-
-    
-  </body>
+</body>
 </html>
