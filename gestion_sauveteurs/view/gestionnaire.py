@@ -7,10 +7,13 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtCore import Qt, QDateTime
 
-# Imports Backend
+# Imports CRUD (Lecture seule)
 from gestion_sauveteurs.crud.sauveteur import SauveteurCRUD
 from gestion_sauveteurs.crud.planning import PlanningCRUD
 from gestion_sauveteurs.view.planning_public import InterfacePlanning
+
+# --- IMPORTANT : ON A SUPPRIMÉ L'IMPORT CIRCULAIRE ICI ---
+# (On fera les imports DANS les méthodes)
 
 # --- NOUVELLE CLASSE : Dialogue de suppression ---
 class DialogueSupprimerMission(QDialog):
@@ -19,8 +22,9 @@ class DialogueSupprimerMission(QDialog):
         super().__init__(parent)
         self.setWindowTitle("Supprimer une mission")
         self.setFixedSize(300, 150)
-        self.crud_planning = PlanningCRUD()
-
+        # On garde le CRUD ici juste pour vérifier si besoin, 
+        # mais l'action passera par le réseau.
+        
         lbl_titre = QLabel("Suppression Mission", self)
         lbl_titre.setAlignment(Qt.AlignCenter)
         lbl_titre.setStyleSheet("background-color: #d32f2f; color: white; font-weight: bold; padding: 5px;")
@@ -46,11 +50,12 @@ class DialogueSupprimerMission(QDialog):
     def action_supprimer(self):
         id_mission = self.champ_id.text()
         if id_mission:
-            if self.crud_planning.supprimer_mission(id_mission):
-                QMessageBox.information(self, "Succès", f"Mission {id_mission} supprimée.")
-                self.accept()
-            else:
-                QMessageBox.warning(self, "Erreur", "ID introuvable ou erreur BDD.")
+            # IMPORT LOCAL POUR EVITER LA BOUCLE
+            from gestion_sauveteurs.gestion_sauveteurs import supprimer_mission
+            
+            supprimer_mission(id_mission)
+            QMessageBox.information(self, "Succès", f"Demande de suppression envoyée (ID: {id_mission}).")
+            self.accept()
         else:
             QMessageBox.warning(self, "Attention", "Veuillez entrer un ID.")
 
@@ -62,6 +67,7 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Espace Gestionnaire")
         self.resize(1000, 600)
         
+        # Pour la lecture (affichage des tableaux), on garde le CRUD direct
         self.crud_sauveteur = SauveteurCRUD()
         self.crud_planning = PlanningCRUD()
 
@@ -124,10 +130,6 @@ class MainWindow(QMainWindow):
 
         self.setCentralWidget(main_widget)
         self.charger_tableau_sauveteurs()
-
-    # ... (Les méthodes create_page et actions restent identiques) ...
-    # Je ne les répète pas toutes ici pour la lisibilité, mais assure-toi
-    # qu'elles sont bien présentes (create_infos_page, show_infos, etc.)
 
     def create_infos_page(self):
         page = QWidget()
@@ -218,8 +220,11 @@ class MainWindow(QMainWindow):
         spec = self.input_spec.text()
         dep = self.input_dep.text()
         if nom and prenom:
-            self.crud_sauveteur.ajouter(nom, prenom, dep, spec)
-            QMessageBox.information(self, "OK", "Sauveteur ajouté")
+            # IMPORT LOCAL POUR EVITER LA BOUCLE
+            from gestion_sauveteurs.gestion_sauveteurs import ajouter_sauveteur
+            
+            ajouter_sauveteur(nom, prenom, dep, spec)
+            QMessageBox.information(self, "OK", "Sauveteur ajouté et synchronisé !")
             self.input_nom.clear(); self.input_prenom.clear()
             self.show_infos()
         else:
@@ -231,8 +236,11 @@ class MainWindow(QMainWindow):
         fin = self.date_fin.dateTime().toString("yyyy-MM-dd HH:mm:ss")
         mission = self.input_mission.text()
         if sauv_id:
-            self.crud_planning.ajouter_mission(sauv_id, debut, fin, mission)
-            QMessageBox.information(self, "OK", "Mission ajoutée")
+            # IMPORT LOCAL POUR EVITER LA BOUCLE
+            from gestion_sauveteurs.gestion_sauveteurs import ajouter_mission
+            
+            ajouter_mission(sauv_id, debut, fin, mission)
+            QMessageBox.information(self, "OK", "Mission ajoutée et synchronisée !")
             self.planning_widget.charger_donnees() 
         else:
             QMessageBox.warning(self, "Erreur", "Sélectionnez un sauveteur")
@@ -243,7 +251,10 @@ class MainWindow(QMainWindow):
             id_sauv = self.table_sauveteurs.item(row, 0).text()
             nom = self.table_sauveteurs.item(row, 1).text()
             if QMessageBox.question(self, "Confirm", f"Supprimer {nom} ?") == QMessageBox.Yes:
-                self.crud_sauveteur.supprimer(id_sauv)
+                # IMPORT LOCAL POUR EVITER LA BOUCLE
+                from gestion_sauveteurs.gestion_sauveteurs import supprimer_sauveteur
+                
+                supprimer_sauveteur(id_sauv)
                 self.charger_tableau_sauveteurs()
         else:
             QMessageBox.warning(self, "Attention", "Sélectionnez une ligne")
@@ -264,7 +275,7 @@ class MainWindow(QMainWindow):
         if dialog.exec_():
             self.planning_widget.charger_donnees()
 
-# --- FONCTION DE LANCEMENT (Ajoutée) ---
+# --- FONCTION DE LANCEMENT ---
 def lancer_gestionnaire():
     """Lance l'interface Gestionnaire de manière bloquante."""
     app = QApplication.instance()
@@ -277,3 +288,10 @@ def lancer_gestionnaire():
 
 if __name__ == "__main__":
     lancer_gestionnaire()
+    
+    
+    
+    
+    
+    
+    

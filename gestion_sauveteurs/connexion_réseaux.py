@@ -1,109 +1,130 @@
 import socket
 import json
 import os
+import threading
+import time
 
-# Chemin relatif vers le fichier de configuration (adapté à la structure du projet)
-# On remonte de 'gestion_sauveteurs/' vers la racine puis dans 'data/' (ou racine directement selon ta config)
+# --- MODIFICATION : Retour vers config.json ---
 CONFIG_FILE = os.path.join(os.path.dirname(__file__), 'config.json')
 
-def charger_ips_machines():
-    """Charge la liste des adresses IP des machines du réseau depuis le fichier de configuration.
-
-    Cette fonction lit le fichier JSON `config.json` situé dans le même dossier
-    (ou défini par `CONFIG_FILE`) et extrait la liste des IPs.
-
-    Returns:
-        list[str]: Une liste contenant les adresses IP (ex: ``['192.168.1.10', '192.168.1.11']``).
-        Retourne une liste vide si le fichier est introuvable ou mal formé.
-    """
+def charger_config():
+    """Charge la configuration complète (port et machines) depuis config.json."""
+    # Valeurs par défaut
+    default_config = {"port": 5002, "machines": []}
+    
     if not os.path.exists(CONFIG_FILE):
-        print(f"[ERREUR] Fichier de configuration introuvable : {CONFIG_FILE}")
-        return []
-
+        return default_config
     try:
         with open(CONFIG_FILE, 'r') as f:
-            config = json.load(f)
-            # On récupère la clé 'machines' ou 'ips' selon ton JSON
-            return config.get('machines', [])
-    except json.JSONDecodeError:
-        print(f"[ERREUR] Le fichier {CONFIG_FILE} n'est pas un JSON valide.")
-        return []
-    except Exception as e:
-        print(f"[ERREUR] Impossible de lire les IPs : {e}")
-        return []
+            return json.load(f)
+    except:
+        return default_config
 
-def pair():
-    """Établit une connexion TCP avec les autres machines (Handshake).
+class ServeurThread(threading.Thread):
+    """Thread qui écoute les connexions entrantes (Mode Serveur)."""
+    def __init__(self, port, callback_mise_a_jour):
+        super().__init__()
+        self.port = port
+        self.callback = callback_mise_a_jour
+        self.running = True
 
-    Cette fonction parcourt la liste des IPs fournie par :func:`charger_ips_machines`
-    et tente de se connecter sur le port par défaut (5000).
-    
-    Elle permet de vérifier quelles machines sont actuellement en ligne et prêtes
-    à recevoir des mises à jour de la base de données.
+    def run(self):
+        print(f"[SERVEUR] Démarrage de l'écoute sur le port {self.port}...")
+        serveur = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        serveur.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        try:
+            serveur.bind(('0.0.0.0', self.port))
+            serveur.listen(5)
+            while self.running:
+                conn, addr = serveur.accept()
+                threading.Thread(target=self.gerer_client, args=(conn, addr)).start()
+        except Exception as e:
+            print(f"[SERVEUR] Erreur: {e}")
+        finally:
+            serveur.close()
 
-    Note:
-        Le timeout est fixé à 0.5 seconde pour ne pas bloquer l'interface graphique
-        si une machine est éteinte.
+    def gerer_client(self, conn, addr):
+        """Reçoit les données d'un client connecté."""
+        try:
+            buffer = ""
+            while True:
+                data = conn.recv(4096)
+                if not data:
+                    break
+                
+                # Décodage et gestion des messages collés
+                buffer += data.decode('utf-8')
+                
+                while "\n" in buffer:
+                    message_str, buffer = buffer.split("\n", 1)
+                    if not message_str.strip():
+                        continue
+                        
+                    print(f"[RECU] De {addr[0]}: {message_str}")
+                    
+                    try:
+                        message_json = json.loads(message_str)
+                        if self.callback:
+                            self.callback(message_json, addr[0])
+                    except json.JSONDecodeError:
+                        print(f"[ERREUR] JSON invalide reçu de {addr}")
 
-    Returns:
-        list[socket.socket]: La liste des objets `socket` connectés avec succès.
+        except Exception as e:
+            print(f"[CONNEXION] Erreur avec {addr}: {e}")
+        finally:
+            conn.close()
+
+def pair(callback_mise_a_jour=None):
     """
-    ips = charger_ips_machines()
+    1. Lit config.json pour trouver le port et les IPs.
+    2. Lance le serveur.
+    3. Connecte les clients.
+    """
+    config = charger_config()
+    # On utilise le port du fichier, ou 5002 par défaut
+    port = config.get("port", 5002)
+    ips = config.get("machines", [])
+
+    # 1. SERVEUR
+    if callback_mise_a_jour:
+        thread_serveur = ServeurThread(port, callback_mise_a_jour)
+        thread_serveur.daemon = True 
+        thread_serveur.start()
+
+    # 2. CLIENT
     sockets_actifs = []
-    port = 5000  # Port par défaut pour l'application
-
-    print(f"[RESEAU] Démarrage du pairing vers {len(ips)} machines...")
-
+    print(f"[CLIENT] Tentative de connexion vers {len(ips)} machines sur le port {port}...")
+    
     for ip in ips:
         try:
-            # Création du socket TCP
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            s.settimeout(0.5) # Timeout court
-            
-            # Tentative de connexion
-            resultat = s.connect_ex((ip, port))
-            
-            if resultat == 0:
-                print(f"[RESEAU] Succès : Connecté à {ip}")
+            s.settimeout(2) 
+            if s.connect_ex((ip, port)) == 0:
+                print(f"[CLIENT] Connecté à {ip}")
                 sockets_actifs.append(s)
             else:
-                # Si échec, on ferme proprement
                 s.close()
-                # print(f"[RESEAU] Échec vers {ip} (Code: {resultat})")
-                
-        except Exception as e:
-            print(f"[RESEAU] Erreur lors de la connexion à {ip} : {e}")
-
-    print(f"[RESEAU] Pairing terminé. {len(sockets_actifs)} machines connectées.")
+        except:
+            pass
+            
     return sockets_actifs
 
-def envoyer_message(message_json, sockets_cibles=None):
-    """Envoie un message JSON à une liste de machines connectées.
+def envoyer_message(message_dict, sockets_cibles):
+    """Envoie un message JSON avec un saut de ligne."""
+    if not sockets_cibles:
+        print("[ENVOI] Aucun destinataire connecté.")
+        return
 
-    Args:
-        message_json (str): La chaîne de caractères au format JSON à envoyer.
-        sockets_cibles (list[socket.socket], optional): Une liste de sockets ouverts. 
-            Si None, appelle :func:`pair` pour trouver les machines actives.
-
-    Returns:
-        int: Le nombre de machines ayant reçu le message avec succès.
-    """
-    if sockets_cibles is None:
-        sockets_cibles = pair()
-
-    succes = 0
-    # On ajoute un saut de ligne car c'est souvent utilisé comme délimiteur en TCP
-    data = (message_json + "\n").encode('utf-8')
+    data_json = json.dumps(message_dict) + "\n"
+    data_bytes = data_json.encode('utf-8')
 
     for s in sockets_cibles:
         try:
-            s.sendall(data)
-            succes += 1
-        except Exception as e:
-            print(f"[RESEAU] Erreur d'envoi : {e}")
+            s.sendall(data_bytes)
             try:
-                s.close()
+                ip_dest = s.getpeername()[0]
             except:
-                pass
-    
-    return succes
+                ip_dest = "Inconnu"
+            print(f"[ENVOI] Message envoyé à {ip_dest}")
+        except Exception as e:
+            print(f"[ENVOI] Erreur vers {s}: {e}")
