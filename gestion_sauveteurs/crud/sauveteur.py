@@ -3,24 +3,38 @@ from gestion_sauveteurs.database import DatabaseManager
 
 # --- Fonction utilitaire pour le réseau (Perceval) ---
 def NOTIFIER_RESEAU(payload):
-    """Placeholder pour la fonction d'envoi réseau de Perceval."""
+    """Fonction placeholder pour simuler l'envoi réseau.
+
+    Args:
+        payload (str): Le message JSON à envoyer.
+
+    Returns:
+        None
+    """
     # print(f"[NOTIFICATION SIMULÉE] Envoi du payload : {payload}")
     pass
 
 class SauveteurCRUD:
+    """Classe de gestion des opérations CRUD pour les sauveteurs.
+    """
+
     def __init__(self):
+        """Initialise le gestionnaire de base de données.
+        """
         self.db_manager = DatabaseManager()
 
     def get_tous(self):
-        """Récupère tous les sauveteurs sous forme de liste de dictionnaires."""
+        """Récupère tous les sauveteurs de la base de données.
+
+        Returns:
+            list[dict]: Une liste de dictionnaires contenant les infos des sauveteurs.
+        """
         conn = self.db_manager.get_connection()
-        # Cette ligne permet d'avoir des résultats par nom de colonne (ex: ligne['nom'])
         conn.row_factory = sqlite3.Row  
         cursor = conn.cursor()  
         try:
             cursor.execute("SELECT * FROM sauveteur")
             rows = cursor.fetchall()
-            # Conversion en liste de dictionnaires propre
             return [dict(row) for row in rows]
         except sqlite3.Error as e:
             print(f"Erreur de lecture : {e}")
@@ -29,7 +43,17 @@ class SauveteurCRUD:
             conn.close()
 
     def ajouter(self, nom, prenom, departement, specialite):
-        """Ajoute un nouveau sauveteur avec le statut 'disponible'."""
+        """Ajoute un nouveau sauveteur.
+
+        Args:
+            nom (str): Le nom du sauveteur.
+            prenom (str): Le prénom du sauveteur.
+            departement (str): Le département (ex: '75').
+            specialite (str): La spécialité (ex: 'Plongée').
+
+        Returns:
+            int | None: L'ID du sauveteur créé, ou None en cas d'erreur.
+        """
         conn = self.db_manager.get_connection()
         cursor = conn.cursor()
         try:
@@ -47,7 +71,14 @@ class SauveteurCRUD:
             conn.close()
 
     def supprimer(self, id_sauveteur):
-        """Supprime un sauveteur."""
+        """Supprime un sauveteur par son ID.
+
+        Args:
+            id_sauveteur (int | str): L'identifiant du sauveteur à supprimer.
+
+        Returns:
+            bool: True si la suppression a réussi, False sinon.
+        """
         conn = self.db_manager.get_connection()
         cursor = conn.cursor()
         try:
@@ -62,9 +93,17 @@ class SauveteurCRUD:
             conn.close()
 
     def update_statut(self, id_sauveteur, nouveau_statut):
-        """Change le statut et notifie le réseau (Logique Réseau)."""
+        """Met à jour le statut et notifie le réseau.
+
+        Args:
+            id_sauveteur (int | str): L'ID du sauveteur.
+            nouveau_statut (str): Le nouveau statut (ex: 'en mission').
+
+        Returns:
+            bool: True si la mise à jour a réussi, False sinon.
+        """
         conn = self.db_manager.get_connection()
-        conn.row_factory = sqlite3.Row # Important pour récupérer les infos après update
+        conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
         try:
             # 1. Mise à jour de la BDD
@@ -75,16 +114,12 @@ class SauveteurCRUD:
 
             # 2. Notification si la mise à jour a eu lieu
             if success:
-                # Récupérer les données mises à jour pour le payload
                 cursor.execute("SELECT * FROM sauveteur WHERE id = ?", (id_sauveteur,))
                 row = cursor.fetchone()
                 if row:
                     data = dict(row)
-                    # Générer le JSON avec ton module
                     from gestion_sauveteurs.utils.serialiseur import creer_payload_update
                     payload = creer_payload_update("sauveteur", data)
-                    
-                    # C'est ici que tu passes la main à Perceval
                     NOTIFIER_RESEAU(payload) 
 
             return success
