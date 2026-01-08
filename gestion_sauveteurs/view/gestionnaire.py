@@ -11,6 +11,7 @@ from PyQt5.QtCore import Qt, QDateTime
 from gestion_sauveteurs.crud.sauveteur import SauveteurCRUD
 from gestion_sauveteurs.crud.planning import PlanningCRUD
 from gestion_sauveteurs.view.planning_public import InterfacePlanning
+from gestion_sauveteurs.view.bouton_refresh import BoutonRefresh
 
 # --- IMPORTANT : ON A SUPPRIMÉ L'IMPORT CIRCULAIRE ICI ---
 # (On fera les imports DANS les méthodes)
@@ -32,6 +33,11 @@ class DialogueSupprimerMission(QDialog):
 
         layout = QVBoxLayout()
         layout.setContentsMargins(20, 40, 20, 20)
+
+        #bouton refresh réutilisé
+        self.btn_refresh = BoutonRefresh(self.refresh_planning)
+        layout.addWidget(self.btn_refresh)
+
         
         layout_h = QHBoxLayout()
         layout_h.addWidget(QLabel("ID de la mission :"))
@@ -117,6 +123,7 @@ class MainWindow(QMainWindow):
         self.btn_del_mission = QPushButton("🗑️ Supprimer une mission (via ID)")
         self.btn_del_mission.setStyleSheet("background-color: #d32f2f; color: white; font-weight: bold; padding: 8px;")
         self.btn_del_mission.clicked.connect(self.ouvrir_suppression_mission)
+
 
         # Assemblage final
         main_layout.addWidget(menu_widget, 1)
@@ -288,6 +295,7 @@ def lancer_gestionnaire():
 
 if __name__ == "__main__":
     lancer_gestionnaire()
+    
     
     
     
