@@ -68,6 +68,16 @@ Gestion des Utilisateurs
    :undoc-members:
    :show-inheritance:
 
+Lancement de l'Application
+--------------------------
+
+Script racine permettant de démarrer le logiciel.
+
+.. automodule:: Gestion_Sauveteur_Speleologue
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 
 Indices et Tables
 -----------------
