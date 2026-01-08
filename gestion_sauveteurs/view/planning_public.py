@@ -3,12 +3,14 @@ from PyQt5.QtWidgets import (QApplication, QWidget, QLabel, QVBoxLayout, QTableW
                              QTableWidgetItem, QHeaderView, QMessageBox)
 from PyQt5.QtCore import Qt
 from gestion_sauveteurs.database import DatabaseManager
-from PyQt5.QtCore import QDateTime
 
 class InterfacePlanning(QWidget):
+    """Widget affichant le planning complet (lecture seule)."""
     def __init__(self, parent=None):
         super().__init__(parent)
         self.db_manager = DatabaseManager()
+        self.setWindowTitle("Planning Public") # Titre de la fenêtre si autonome
+        self.resize(800, 500)
 
         # --- STYLE ---
         self.setStyleSheet("background-color: #e9e4de;")
@@ -45,7 +47,7 @@ class InterfacePlanning(QWidget):
     def charger_donnees(self):
         """Récupère tout le planning."""
         conn = self.db_manager.get_connection()
-        conn.row_factory = None # On veut des tuples pour l'indexation simple, ou gère le Row
+        conn.row_factory = None
         cursor = conn.cursor()
         try:
             sql = """
@@ -70,9 +72,16 @@ class InterfacePlanning(QWidget):
         finally:
             conn.close()
 
+# --- FONCTION DE LANCEMENT (Ajoutée) ---
+def lancer_planning_public():
+    """Lance le planning en mode lecture seule (bloquant)."""
+    app = QApplication.instance()
+    if not app:
+        app = QApplication(sys.argv)
+        
+    fenetre = InterfacePlanning()
+    fenetre.show()
+    app.exec_()
+
 if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    fen = InterfacePlanning()
-    fen.resize(800, 400)
-    fen.show()
-    sys.exit(app.exec_())
+    lancer_planning_public()
