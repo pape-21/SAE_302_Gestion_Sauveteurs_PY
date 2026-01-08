@@ -1,24 +1,51 @@
-.. Application graphique de gestion des sauveteurs spéléologues documentation master file, created by
-   sphinx-quickstart on Sun Oct 19 16:47:51 2025.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
 .. Documentation Gestion Sauveteurs
 
 Bienvenue dans la documentation de Gestion Sauveteurs !
 =======================================================
 
-Cette documentation détaille le fonctionnement technique de l'application, 
-notamment les interactions avec la base de données (CRUD).
+Cette documentation détaille le fonctionnement technique de l'application SAE 302, 
+des interactions réseaux à la gestion de la base de données.
 
 .. toctree::
    :maxdepth: 2
    :caption: Table des matières:
 
-Module CRUD (Base de données)
+Contrôleur Principal
+--------------------
+
+C'est le point d'entrée de l'application, qui orchestre l'interface et le réseau.
+
+.. automodule:: gestion_sauveteurs.gestion_sauveteurs
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Configuration de la Base de Données
+-----------------------------------
+
+Gestion de la connexion SQLite et de l'initialisation.
+
+.. automodule:: gestion_sauveteurs.database
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module Réseau (Communication)
 -----------------------------
 
-Cette partie gère toutes les communications avec la base de données SQLite.
+Ce module gère la découverte des autres machines et l'échange de données.
+
+Connexion et Configuration
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. automodule:: gestion_sauveteurs.connexion_réseaux
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module CRUD (Données)
+---------------------
+
+Cette partie gère toutes les requêtes SQL vers la base de données.
 
 Gestion des Sauveteurs
 ~~~~~~~~~~~~~~~~~~~~~~

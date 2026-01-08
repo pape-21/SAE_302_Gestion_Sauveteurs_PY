@@ -7,7 +7,10 @@ from gestion_sauveteurs.crud.utilisateur import UtilisateurCRUD
 
 # --- SOUS-FENÊTRE : Ajouter Utilisateur ---
 class DialogueAjoutUtilisateur(QDialog):
+    """Fenêtre de dialogue pour l'ajout d'un nouvel utilisateur."""
+
     def __init__(self, parent=None):
+        """Initialise le formulaire d'ajout."""
         super().__init__(parent)
         self.setWindowTitle("Ajouter un utilisateur")
         self.setFixedSize(300, 250)
@@ -44,6 +47,7 @@ class DialogueAjoutUtilisateur(QDialog):
         self.setLayout(layout)
 
     def action_ajouter(self):
+        """Récupère les données saisies et appelle le CRUD pour l'insertion."""
         identifiant = self.champ_identifiant.text()
         mdp = self.champ_mdp.text()
         role = self.combo_role.currentText()
@@ -60,7 +64,10 @@ class DialogueAjoutUtilisateur(QDialog):
 
 # --- SOUS-FENÊTRE : Supprimer Utilisateur ---
 class DialogueSupprimerUtilisateur(QDialog):
+    """Fenêtre de dialogue pour la suppression d'un utilisateur."""
+
     def __init__(self, parent=None):
+        """Initialise le formulaire de suppression."""
         super().__init__(parent)
         self.setWindowTitle("Supprimer un utilisateur")
         self.setFixedSize(300, 150)
@@ -87,6 +94,7 @@ class DialogueSupprimerUtilisateur(QDialog):
         self.setLayout(layout)
 
     def action_supprimer(self):
+        """Vérifie l'identifiant et demande confirmation avant suppression."""
         identifiant = self.champ_id.text()
         if identifiant == "admin":
             QMessageBox.critical(self, "Stop", "Impossible de supprimer le super-admin !")
@@ -102,7 +110,10 @@ class DialogueSupprimerUtilisateur(QDialog):
 
 # --- FENÊTRE PRINCIPALE : ADMINISTRATEUR ---
 class FenetreAdministrateur(QWidget):
+    """Interface principale dédiée à l'administrateur (gestion des comptes)."""
+
     def __init__(self):
+        """Configure la fenêtre et charge les données."""
         super().__init__()
         self.controleur = UtilisateurCRUD() 
         self.configurer_fenetre()
@@ -110,11 +121,13 @@ class FenetreAdministrateur(QWidget):
         self.charger_donnees() 
 
     def configurer_fenetre(self):
+        """Paramètre les propriétés de base de la fenêtre (taille, titre)."""
         self.setWindowTitle("Espace Administrateur - Gestion des Comptes")
         self.resize(900, 500)
         self.setStyleSheet("background-color: #f4f4f9;")
 
     def creer_interface(self):
+        """Construit la disposition graphique (Layouts, Boutons, Tableau)."""
         layout_principal = QVBoxLayout()
         layout_principal.setContentsMargins(0, 0, 0, 0)
 
@@ -175,7 +188,7 @@ class FenetreAdministrateur(QWidget):
         self.setLayout(layout_principal)
 
     def charger_donnees(self):
-        """Récupère la liste des users depuis la BDD."""
+        """Récupère la liste des utilisateurs depuis la BDD et remplit le tableau."""
         try:
             users = self.controleur.get_tous()
             self.tableau_users.setRowCount(0)
@@ -189,17 +202,33 @@ class FenetreAdministrateur(QWidget):
             print(f"Erreur chargement : {e}")
 
     def ouvrir_ajout(self):
+        """Ouvre la fenêtre modale d'ajout d'utilisateur."""
         dial = DialogueAjoutUtilisateur(self)
         if dial.exec_(): 
             self.charger_donnees()
 
     def ouvrir_suppression(self):
+        """Ouvre la fenêtre modale de suppression d'utilisateur."""
         dial = DialogueSupprimerUtilisateur(self)
         if dial.exec_():
             self.charger_donnees()
 
+# --- FONCTION PUBLIQUE POUR LE CHEF D'ORCHESTRE ---
+def lancer_administrateur():
+    """Lance l'interface administrateur de manière bloquante.
+
+    Cette fonction instancie la fenêtre `FenetreAdministrateur`, l'affiche,
+    et lance la boucle d'événements Qt.
+    """
+    app = QApplication.instance()
+    if not app:
+        app = QApplication(sys.argv)
+        
+    fenetre = FenetreAdministrateur()
+    fenetre.show()
+    
+    # On lance la boucle. Le script s'arrêtera ici tant que la fenêtre est ouverte.
+    app.exec_()
+
 if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    fen = FenetreAdministrateur()
-    fen.show()
-    sys.exit(app.exec_())
+    lancer_administrateur()

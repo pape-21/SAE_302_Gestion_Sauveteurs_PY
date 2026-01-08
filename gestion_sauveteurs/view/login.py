@@ -1,19 +1,19 @@
 import sys
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QLabel, QLineEdit, 
-                             QPushButton, QVBoxLayout, QHBoxLayout, QMessageBox)
+                             QPushButton, QVBoxLayout, QHBoxLayout, QMessageBox, QDialog)
 from PyQt5.QtCore import Qt
 
-# --- IMPORTS DES VUES ET DU BACKEND ---
+# Imports Backend
 from gestion_sauveteurs.crud.utilisateur import UtilisateurCRUD
-from gestion_sauveteurs.view.planning_public import InterfacePlanning
-from gestion_sauveteurs.view.administrateur import FenetreAdministrateur
-# On importe la fenêtre qu'on vient de finir (alias pour la clarté)
-from gestion_sauveteurs.view.gestionnaire import MainWindow as FenetreGestionnaire
+# Note: On n'importe plus les autres vues ici pour éviter les cycles, 
+# car c'est le gestion_sauveteurs.py qui va gérer la suite.
 
 class InterfaceLogin(QWidget):
-    def __init__(self, parent=None):
+    """Widget contenant le formulaire de connexion."""
+    
+    def __init__(self, fenetre_parente=None):
         super().__init__()
-        self.parent = parent
+        self.fenetre_parente = fenetre_parente
         self.controleur = UtilisateurCRUD()
 
         # --- STYLE ---
@@ -23,25 +23,18 @@ class InterfaceLogin(QWidget):
         layout_principal.setContentsMargins(0, 0, 0, 0)
 
         # Bandeau
-        barre_titre = QLabel("Application de gestion de planning")
+        barre_titre = QLabel("Connexion")
         barre_titre.setAlignment(Qt.AlignCenter)
-        barre_titre.setFixedHeight(40)
-        barre_titre.setStyleSheet("background-color: #1a6f91; color: white; font-weight: bold;")
+        barre_titre.setFixedHeight(60)
+        barre_titre.setStyleSheet("background-color: #1a6f91; color: white; font-weight: bold; font-size: 16px;")
         layout_principal.addWidget(barre_titre)
-
-        # Bouton Planning Public
-        h_top = QHBoxLayout()
-        h_top.addStretch()
-        self.btn_planning = QPushButton("Voir le planing")
-        h_top.addWidget(self.btn_planning)
-        layout_principal.addLayout(h_top)
 
         layout_principal.addStretch()
 
         # Champ Login
         h_user = QHBoxLayout()
         h_user.addStretch()
-        h_user.addWidget(QLabel("Login"))
+        h_user.addWidget(QLabel("Identifiant :"))
         self.user = QLineEdit()
         self.user.setFixedWidth(200)
         h_user.addWidget(self.user)
@@ -51,7 +44,7 @@ class InterfaceLogin(QWidget):
         # Champ Mdp
         h_pw = QHBoxLayout()
         h_pw.addStretch()
-        h_pw.addWidget(QLabel("Mot de passe"))
+        h_pw.addWidget(QLabel("Mot de passe :"))
         self.pw = QLineEdit()
         self.pw.setFixedWidth(200)
         self.pw.setEchoMode(QLineEdit.Password)
@@ -61,69 +54,76 @@ class InterfaceLogin(QWidget):
 
         layout_principal.addSpacing(20)
 
-        # Bouton Connecter
+        # Boutons
         h_btn = QHBoxLayout()
         h_btn.addStretch()
         self.btn_connect = QPushButton("Se connecter")
+        self.btn_connect.clicked.connect(self.action_login)
+        self.btn_connect.setStyleSheet("padding: 8px 15px; font-weight: bold;")
         h_btn.addWidget(self.btn_connect)
         h_btn.addStretch()
         layout_principal.addLayout(h_btn)
 
         layout_principal.addStretch()
 
-        # Connexions
-        self.btn_planning.clicked.connect(self.action_voir_planning)
-        self.btn_connect.clicked.connect(self.action_login)
-
-    def action_voir_planning(self):
-        self.fenetre_pub = InterfacePlanning()
-        self.fenetre_pub.show()
-
     def action_login(self):
+        """Vérifie les identifiants et ferme la fenêtre en cas de succès."""
         identifiant = self.user.text()
         mdp = self.pw.text()
         
-        # Le CRUD renvoie : 'administrateur', 'gestionnaire', ou None
+        # Vérification BDD
         role = self.controleur.verifier_connexion(identifiant, mdp)
         
         if role:
-            # --- C'EST ICI QUE SE FAIT L'AIGUILLAGE ---
-            if self.parent:
-                if role == 'administrateur':
-                    self.parent.afficher_admin()
-                elif role == 'gestionnaire':
-                    self.parent.afficher_gestionnaire()
-                elif role == 'lecture':
-                    # Si tu as un utilisateur "lecture seule", on peut renvoyer vers le planning public
-                    self.action_voir_planning()
-                else:
-                    QMessageBox.warning(self, "Erreur", f"Rôle inconnu : {role}")
+            # Si le parent est une fenêtre de dialogue (cas lancer_login), on lui passe le résultat
+            if self.fenetre_parente:
+                self.fenetre_parente.role_authentifie = role
+                self.fenetre_parente.accept() # Ferme le dialogue avec succès (result code 1)
         else:
-            QMessageBox.warning(self, "Erreur", "Identifiants incorrects")
+            QMessageBox.warning(self, "Erreur", "Identifiant ou mot de passe incorrect.")
 
 
-# Classe principale (Conteneur)
-class Gestionnaire(QMainWindow):
+class FenetreLogin(QDialog):
+    """Fenêtre de dialogue principale pour le login (bloquante)."""
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("SAE Planning")
-        self.resize(1000, 600)
-        self.afficher_login()
+        self.setWindowTitle("Authentification - SAE Planning")
+        self.resize(500, 300)
+        self.role_authentifie = None # Variable pour stocker le résultat
+        
+        # On intègre le widget créé plus haut
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        self.widget_login = InterfaceLogin(self)
+        layout.addWidget(self.widget_login)
 
-    def afficher_login(self):
-        """Affiche l'écran de connexion."""
-        self.setCentralWidget(InterfaceLogin(self))
+def lancer_login():
+    """Fonction helper pour afficher la fenêtre de login et récupérer le rôle.
 
-    def afficher_admin(self):
-        """Affiche l'écran Administrateur."""
-        self.setCentralWidget(FenetreAdministrateur())
+    Cette fonction crée une application Qt (si elle n'existe pas), lance
+    la fenêtre de connexion en mode modal (bloquant), et attend que l'utilisateur
+    se connecte.
 
-    def afficher_gestionnaire(self):
-        """Affiche l'écran Gestionnaire."""
-        self.setCentralWidget(FenetreGestionnaire())
+    Returns:
+        str | None: Le rôle de l'utilisateur ('administrateur', 'gestionnaire'...) 
+                    ou None si la fenêtre est fermée sans connexion.
+    """
+    # On récupère l'instance QApplication existante ou on en crée une
+    app = QApplication.instance()
+    if not app:
+        app = QApplication(sys.argv)
+        
+    dialogue = FenetreLogin()
+    
+    # exec_() lance la boucle locale et bloque le code ici jusqu'à la fermeture
+    resultat = dialogue.exec_() 
+    
+    if resultat == QDialog.Accepted:
+        return dialogue.role_authentifie
+    else:
+        return None
 
+# Pour tester le fichier seul
 if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    win = Gestionnaire()
-    win.show()
-    sys.exit(app.exec_())
+    role = lancer_login()
+    print(f"Rôle récupéré : {role}")
