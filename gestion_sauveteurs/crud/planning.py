@@ -26,6 +26,22 @@ class PlanningCRUD:
         finally:
             conn.close()
 
+            
+    def supprimer_mission(self, id_mission):
+        """Supprime une mission du planning."""
+        conn = self.db_manager.get_connection()
+        cursor = conn.cursor()
+        try:
+            sql = "DELETE FROM planning WHERE id = ?"
+            cursor.execute(sql, (id_mission,))
+            conn.commit()
+            return cursor.rowcount > 0
+        except sqlite3.Error as e:
+            print(f"Erreur suppression mission : {e}")
+            return False
+        finally:
+            conn.close()
+
     def get_planning_global(self, date_operation):
         """
         Récupère toutes les entrées de planning pour la date donnée,

@@ -1,209 +1,205 @@
 import sys
-from PyQt5.QtWidgets import (
-    QApplication, QMainWindow, QWidget, QLabel, QPushButton,
-    QVBoxLayout, QHBoxLayout, QTableWidget, QHeaderView,
-    QTableWidgetItem, QStackedWidget, QFrame, QLineEdit, QFormLayout
-)
+from PyQt5.QtWidgets import (QApplication, QWidget, QLabel, QPushButton, 
+                             QVBoxLayout, QHBoxLayout, QTableWidget, QTableWidgetItem,
+                             QHeaderView, QDialog, QLineEdit, QFormLayout, QMessageBox, QComboBox)
 from PyQt5.QtCore import Qt
+from gestion_sauveteurs.crud.utilisateur import UtilisateurCRUD
 
-# ================== FENÊTRE AJOUTER UTILISATEUR ==================
-class FenetreAjouterUtilisateur(QWidget):
+# --- SOUS-FENÊTRE : Ajouter Utilisateur ---
+class DialogueAjoutUtilisateur(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Ajouter un utilisateur")
+        self.setFixedSize(300, 250)
+        self.controleur = UtilisateurCRUD() # Connexion au moteur
+        
+        # Titre
+        lbl_titre = QLabel("Nouvel Utilisateur", self)
+        lbl_titre.setAlignment(Qt.AlignCenter)
+        lbl_titre.setStyleSheet("background-color: #0b66c3; color: white; font-weight: bold; padding: 5px;")
+        lbl_titre.setGeometry(0, 0, 300, 30)
+
+        layout = QFormLayout()
+        layout.setContentsMargins(20, 50, 20, 20)
+        
+        # Champs
+        self.champ_identifiant = QLineEdit()
+        self.champ_identifiant.setPlaceholderText("Ex: dupont_j")
+        
+        self.champ_mdp = QLineEdit() 
+        self.champ_mdp.setEchoMode(QLineEdit.Password)
+        self.champ_mdp.setPlaceholderText("Mot de passe")
+
+        self.combo_role = QComboBox()
+        self.combo_role.addItems(["administrateur", "gestionnaire", "lecture"])
+
+        layout.addRow("Identifiant :", self.champ_identifiant)
+        layout.addRow("Mot de passe :", self.champ_mdp)
+        layout.addRow("Rôle :", self.combo_role)
+
+        self.btn_ajouter = QPushButton("Valider")
+        self.btn_ajouter.clicked.connect(self.action_ajouter)
+        layout.addRow("", self.btn_ajouter)
+        
+        self.setLayout(layout)
+
+    def action_ajouter(self):
+        identifiant = self.champ_identifiant.text()
+        mdp = self.champ_mdp.text()
+        role = self.combo_role.currentText()
+
+        if identifiant and mdp:
+            succes = self.controleur.ajouter_utilisateur(identifiant, mdp, role)
+            if succes:
+                QMessageBox.information(self, "Succès", f"Utilisateur {identifiant} créé.")
+                self.accept() # Ferme la fenêtre
+            else:
+                QMessageBox.warning(self, "Erreur", "Cet identifiant existe déjà.")
+        else:
+            QMessageBox.warning(self, "Attention", "Remplissez tous les champs.")
+
+# --- SOUS-FENÊTRE : Supprimer Utilisateur ---
+class DialogueSupprimerUtilisateur(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Supprimer un utilisateur")
+        self.setFixedSize(300, 150)
+        self.controleur = UtilisateurCRUD()
+
+        lbl_titre = QLabel("Suppression", self)
+        lbl_titre.setAlignment(Qt.AlignCenter)
+        lbl_titre.setStyleSheet("background-color: #d32f2f; color: white; font-weight: bold; padding: 5px;")
+        lbl_titre.setGeometry(0, 0, 300, 30)
+
+        layout = QVBoxLayout()
+        layout.setContentsMargins(20, 40, 20, 20)
+        
+        layout_h = QHBoxLayout()
+        layout_h.addWidget(QLabel("Identifiant à supprimer :"))
+        self.champ_id = QLineEdit()
+        layout_h.addWidget(self.champ_id)
+        layout.addLayout(layout_h)
+
+        self.btn_supprimer = QPushButton("Supprimer définitivement")
+        self.btn_supprimer.setStyleSheet("color: red;")
+        self.btn_supprimer.clicked.connect(self.action_supprimer)
+        layout.addWidget(self.btn_supprimer, alignment=Qt.AlignCenter)
+        self.setLayout(layout)
+
+    def action_supprimer(self):
+        identifiant = self.champ_id.text()
+        if identifiant == "admin":
+            QMessageBox.critical(self, "Stop", "Impossible de supprimer le super-admin !")
+            return
+
+        if QMessageBox.question(self, "Sûr ?", f"Supprimer {identifiant} ?") == QMessageBox.Yes:
+            succes = self.controleur.supprimer(identifiant)
+            if succes:
+                QMessageBox.information(self, "Fait", "Utilisateur supprimé.")
+                self.accept()
+            else:
+                QMessageBox.warning(self, "Erreur", "Utilisateur introuvable.")
+
+# --- FENÊTRE PRINCIPALE : ADMINISTRATEUR ---
+class FenetreAdministrateur(QWidget):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Ajouter Utilisateurs")
-        self.setFixedSize(350, 250)
-        self.setStyleSheet("background-color: #e9e4de;")
+        self.controleur = UtilisateurCRUD() 
+        self.configurer_fenetre()
+        self.creer_interface()
+        self.charger_donnees() 
 
-        layout = QVBoxLayout(self)
-        bandeau = QLabel("Ajouter Utilisateurs")
-        bandeau.setFixedHeight(30)
-        bandeau.setAlignment(Qt.AlignCenter)
-        bandeau.setStyleSheet("background-color: #1a6f91; color: white; font-weight: bold;")
-        layout.addWidget(bandeau)
+    def configurer_fenetre(self):
+        self.setWindowTitle("Espace Administrateur - Gestion des Comptes")
+        self.resize(900, 500)
+        self.setStyleSheet("background-color: #f4f4f9;")
 
-        form_layout = QFormLayout()
-        form_layout.setSpacing(15)
-        form_layout.addRow("nom :", QLineEdit())
-        form_layout.addRow("prénom :", QLineEdit())
-        form_layout.addRow("profil :", QLineEdit())
-        layout.addLayout(form_layout)
+    def creer_interface(self):
+        layout_principal = QVBoxLayout()
+        layout_principal.setContentsMargins(0, 0, 0, 0)
 
-        btn = QPushButton("Ajouter")
-        btn.setStyleSheet("background-color: #f8f8f8; border: 1px solid gray; padding: 5px;")
-        layout.addWidget(btn)
+        # 1. Bandeau
+        label_titre = QLabel("Administration des Utilisateurs")
+        label_titre.setAlignment(Qt.AlignCenter)
+        label_titre.setStyleSheet("background-color: #0b66c3; color: white; font-size: 16px; font-weight: bold; padding: 15px;")
+        layout_principal.addWidget(label_titre)
 
-# ================== FENÊTRE SUPPRIMER UTILISATEUR ==================
-class FenetreSupprimerUtilisateur(QWidget):
-    def __init__(self):
-        super().__init__()
-        self.setWindowTitle("Supprimer Utilisateurs")
-        self.setFixedSize(300, 160)
-        self.setStyleSheet("background-color: #e9e4de;")
+        # 2. Zone centrale
+        layout_centre = QHBoxLayout()
+        layout_centre.setContentsMargins(20, 20, 20, 20)
 
-        layout = QVBoxLayout(self)
-        bandeau = QLabel("Supprimer Utilisateurs")
-        bandeau.setFixedHeight(30)
-        bandeau.setAlignment(Qt.AlignCenter)
-        bandeau.setStyleSheet("background-color: #1a6f91; color: white; font-weight: bold;")
-        layout.addWidget(bandeau)
+        # --- Colonne Gauche : Boutons ---
+        layout_boutons = QVBoxLayout()
+        layout_boutons.setAlignment(Qt.AlignTop)
+        layout_boutons.setSpacing(15)
 
-        form_layout = QFormLayout()
-        form_layout.addRow("id :", QLineEdit())
-        layout.addLayout(form_layout)
-
-        btn = QPushButton("Supprimer")
-        btn.setStyleSheet("background-color: #f8f8f8; border: 1px solid gray;")
-        layout.addWidget(btn)
-
-# ================== INTERFACE ADMIN ==================
-class InterfaceAdmin(QWidget):
-    def __init__(self, parent):
-        super().__init__()
-        self.parent = parent
-        self.setStyleSheet("background-color: #e9e4de;")
-
-        main_layout = QVBoxLayout(self)
-        main_layout.setContentsMargins(0, 0, 0, 0)
-
-        bandeau = QLabel("Administrateur")
-        bandeau.setFixedHeight(45)
-        bandeau.setAlignment(Qt.AlignCenter)
-        bandeau.setStyleSheet("background-color: #1a6f91; color: white; font-size: 16px; font-weight: bold;")
-        main_layout.addWidget(bandeau)
-
-        zone = QHBoxLayout()
-        zone.setContentsMargins(20, 20, 20, 20)
-        zone.setSpacing(40)
-
-        # Menu latéral
-        menu = QVBoxLayout()
-        style_btn = "QPushButton { background-color: #f8f8f8; border: 1px solid #b0b0b0; border-radius: 4px; padding: 10px; min-width: 200px; }"
-
-        self.btn_users = QPushButton("modifier les utilisateurs")
-        self.btn_infos = QPushButton("informations générales")
-        self.btn_plan = QPushButton("voir le planning")
-
-        for b in [self.btn_users, self.btn_infos, self.btn_plan]:
-            b.setStyleSheet(style_btn)
-            menu.addWidget(b)
-        menu.addStretch()
-
-        self.stack = QStackedWidget()
-
-        # --- PAGE 0 : ACCUEIL (Tableau en haut avec 1 ligne de données) ---
-        page_accueil = QWidget()
-        v1 = QVBoxLayout(page_accueil)
-        v1.setContentsMargins(0, 0, 0, 0)
-        
-        # On ne crée que 1 ligne de données (+ l'en-tête)
-        self.table_accueil = self.creer_tableau(["ID", "Nom", "Prenom", "Profil"], 600, 85)
-        self.table_accueil.setItem(0, 0, QTableWidgetItem("1"))
-        self.table_accueil.setItem(0, 1, QTableWidgetItem("Gueye"))
-        self.table_accueil.setItem(0, 2, QTableWidgetItem("Sokhna"))
-        self.table_accueil.setItem(0, 3, QTableWidgetItem("admin"))
-        
-        v1.addWidget(self.table_accueil, alignment=Qt.AlignTop)
-        v1.addStretch() # Force le tableau à rester tout en haut
-
-        # --- PAGE 1 : MODIFIER ---
-        page_users = QWidget()
-        v2 = QVBoxLayout(page_users)
-        cadre_u = self.creer_cadre_avec_croix("Utilisateurs", 350, 200)
-        lay_u = QVBoxLayout(cadre_u)
-        lay_u.setContentsMargins(20, 50, 20, 20)
-        self.btn_add = QPushButton("Ajouter utilisateur")
-        self.btn_sup = QPushButton("Supprimer utilisateur")
-        for b in [self.btn_add, self.btn_sup]:
-            b.setStyleSheet(style_btn)
-            lay_u.addWidget(b)
-        v2.addWidget(cadre_u, alignment=Qt.AlignTop)
-
-        # --- PAGE 2 : INFOS GÉNÉRALES ---
-        page_infos = QWidget()
-        v3 = QVBoxLayout(page_infos)
-        cadre_i = self.creer_cadre_avec_croix("Infos Générales", 620, 150)
-        lay_i = QVBoxLayout(cadre_i)
-        lay_i.setContentsMargins(10, 50, 10, 10)
-        # Tableau infos avec une seule ligne aussi
-        lay_i.addWidget(self.creer_tableau(["Nom", "Prenom", "Spécialité", "Département"], 600, 85))
-        v3.addWidget(cadre_i, alignment=Qt.AlignTop)
-        v3.addStretch()
-
-        self.stack.addWidget(page_accueil)
-        self.stack.addWidget(page_users)
-        self.stack.addWidget(page_infos)
-
-        zone.addLayout(menu)
-        zone.addWidget(self.stack)
-        main_layout.addLayout(zone)
-
-        self.btn_users.clicked.connect(lambda: self.stack.setCurrentIndex(1))
-        self.btn_infos.clicked.connect(lambda: self.stack.setCurrentIndex(2))
-        self.btn_add.clicked.connect(self.ouvrir_ajout)
-        self.btn_sup.clicked.connect(self.ouvrir_sup)
-        self.btn_plan.clicked.connect(self.parent.afficher_le_planning_externe)
-
-    def creer_tableau(self, titres, largeur, hauteur):
-        t = QTableWidget(1, len(titres)) # 1 seule ligne de données
-        t.setHorizontalHeaderLabels(titres)
-        t.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        t.verticalHeader().setVisible(False)
-        t.setFixedSize(largeur, hauteur)
-        t.setStyleSheet("""
-            QTableWidget { 
-                background-color: #4b89c5; 
-                border: 2px solid #0d3b66; 
-                gridline-color: #0d3b66;
-                color: black; 
-                font-weight: bold; 
+        style_btn = """
+            QPushButton {
+                background-color: white; border: 1px solid #aaa; 
+                border-radius: 4px; padding: 10px; text-align: left;
             }
-        """)
-        return t
+            QPushButton:hover { background-color: #e0e0e0; }
+        """
 
-    def creer_cadre_avec_croix(self, titre, w, h):
-        cadre = QFrame()
-        cadre.setFixedSize(w, h)
-        cadre.setStyleSheet("border: 2px solid #1a6f91; background-color: #e9e4de;")
-        bandeau = QLabel(titre, cadre)
-        bandeau.setGeometry(0, 0, w, 30)
-        bandeau.setAlignment(Qt.AlignCenter)
-        bandeau.setStyleSheet("background-color: #1a6f91; color: white; font-weight: bold; border: none;")
-        btn_x = QPushButton("X", cadre)
-        btn_x.setGeometry(w-25, 5, 20, 20)
-        btn_x.setStyleSheet("color: white; font-weight: bold; background: transparent; border: none;")
-        btn_x.clicked.connect(lambda: self.stack.setCurrentIndex(0))
-        return cadre
+        self.btn_ajouter = QPushButton("➕ Ajouter un utilisateur")
+        self.btn_ajouter.setStyleSheet(style_btn)
+        self.btn_ajouter.clicked.connect(self.ouvrir_ajout)
+
+        self.btn_supprimer = QPushButton("🗑️ Supprimer un utilisateur")
+        self.btn_supprimer.setStyleSheet(style_btn)
+        self.btn_supprimer.clicked.connect(self.ouvrir_suppression)
+        
+        self.btn_refresh = QPushButton("🔄 Actualiser la liste")
+        self.btn_refresh.setStyleSheet(style_btn)
+        self.btn_refresh.clicked.connect(self.charger_donnees)
+
+        layout_boutons.addWidget(self.btn_ajouter)
+        layout_boutons.addWidget(self.btn_supprimer)
+        layout_boutons.addWidget(self.btn_refresh)
+        layout_boutons.addStretch()
+
+        # --- Colonne Droite : Tableau ---
+        self.tableau_users = QTableWidget()
+        colonnes = ["ID", "Identifiant", "Rôle"]
+        self.tableau_users.setColumnCount(len(colonnes))
+        self.tableau_users.setHorizontalHeaderLabels(colonnes)
+        self.tableau_users.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.tableau_users.setStyleSheet("background-color: white; border: 1px solid #ccc;")
+        
+        self.tableau_users.horizontalHeader().setStyleSheet("::section{background-color: #0b66c3; color: white;}")
+
+        layout_centre.addLayout(layout_boutons, 1)
+        layout_centre.addWidget(self.tableau_users, 3)
+
+        layout_principal.addLayout(layout_centre)
+        self.setLayout(layout_principal)
+
+    def charger_donnees(self):
+        """Récupère la liste des users depuis la BDD."""
+        try:
+            users = self.controleur.get_tous()
+            self.tableau_users.setRowCount(0)
+            
+            for i, user in enumerate(users):
+                self.tableau_users.insertRow(i)
+                self.tableau_users.setItem(i, 0, QTableWidgetItem(str(user['id'])))
+                self.tableau_users.setItem(i, 1, QTableWidgetItem(str(user['identifiant'])))
+                self.tableau_users.setItem(i, 2, QTableWidgetItem(str(user['role'])))
+        except Exception as e:
+            print(f"Erreur chargement : {e}")
 
     def ouvrir_ajout(self):
-        self.fen_ajout = FenetreAjouterUtilisateur()
-        self.fen_ajout.show()
+        dial = DialogueAjoutUtilisateur(self)
+        if dial.exec_(): 
+            self.charger_donnees()
 
-    def ouvrir_sup(self):
-        self.fen_sup = FenetreSupprimerUtilisateur()
-        self.fen_sup.show()
-
-# ================== FENÊTRE PRINCIPALE ==================
-class Gestionnaire(QMainWindow):
-    def __init__(self):
-        super().__init__()
-        self.setWindowTitle("SAE Planning")
-        self.resize(1100, 700)
-        self.setCentralWidget(InterfaceAdmin(self))
-
-    def afficher_le_planning_externe(self):
-        try:
-            from planning_public import InterfacePlanning
-            le_planning = InterfacePlanning(self)
-            btn_x = QPushButton("X", le_planning)
-            btn_x.setGeometry(1060, 5, 30, 30)
-            btn_x.setStyleSheet("color: white; font-weight: bold; background: transparent; border: none; font-size: 18px;")
-            btn_x.clicked.connect(lambda: self.setCentralWidget(InterfaceAdmin(self)))
-            self.setCentralWidget(le_planning)
-        except ImportError:
-            print("Fichier planning_public.py non trouvé.")
+    def ouvrir_suppression(self):
+        dial = DialogueSupprimerUtilisateur(self)
+        if dial.exec_():
+            self.charger_donnees()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    win = Gestionnaire()
-    win.show()
+    fen = FenetreAdministrateur()
+    fen.show()
     sys.exit(app.exec_())

@@ -3,17 +3,20 @@ from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QLabel, QLineEd
                              QPushButton, QVBoxLayout, QHBoxLayout, QMessageBox)
 from PyQt5.QtCore import Qt
 
-# --- IMPORTS BACKEND & VUES ---
+# --- IMPORTS DES VUES ET DU BACKEND ---
 from gestion_sauveteurs.crud.utilisateur import UtilisateurCRUD
 from gestion_sauveteurs.view.planning_public import InterfacePlanning
+from gestion_sauveteurs.view.administrateur import FenetreAdministrateur
+# On importe la fenêtre qu'on vient de finir (alias pour la clarté)
+from gestion_sauveteurs.view.gestionnaire import MainWindow as FenetreGestionnaire
 
 class InterfaceLogin(QWidget):
     def __init__(self, parent=None):
         super().__init__()
         self.parent = parent
-        self.controleur = UtilisateurCRUD() # <--- Ajout Backend
+        self.controleur = UtilisateurCRUD()
 
-        # --- STYLE SOKHNA ---
+        # --- STYLE ---
         self.setStyleSheet("background-color: #e9e4de;")
         
         layout_principal = QVBoxLayout(self)
@@ -26,7 +29,7 @@ class InterfaceLogin(QWidget):
         barre_titre.setStyleSheet("background-color: #1a6f91; color: white; font-weight: bold;")
         layout_principal.addWidget(barre_titre)
 
-        # Bouton Planning (Haut Droite)
+        # Bouton Planning Public
         h_top = QHBoxLayout()
         h_top.addStretch()
         self.btn_planning = QPushButton("Voir le planing")
@@ -68,12 +71,11 @@ class InterfaceLogin(QWidget):
 
         layout_principal.addStretch()
 
-        # --- CONNEXIONS LOGIQUES (C'est ici qu'on branche tes fils) ---
+        # Connexions
         self.btn_planning.clicked.connect(self.action_voir_planning)
         self.btn_connect.clicked.connect(self.action_login)
 
     def action_voir_planning(self):
-        # On ouvre la fenêtre en "popup" indépendante pour l'instant
         self.fenetre_pub = InterfacePlanning()
         self.fenetre_pub.show()
 
@@ -81,17 +83,26 @@ class InterfaceLogin(QWidget):
         identifiant = self.user.text()
         mdp = self.pw.text()
         
+        # Le CRUD renvoie : 'administrateur', 'gestionnaire', ou None
         role = self.controleur.verifier_connexion(identifiant, mdp)
         
         if role:
-            QMessageBox.information(self, "Succès", f"Bienvenue {identifiant} ({role})")
-            # Ici tu pourras rediriger vers la page Admin plus tard
+            # --- C'EST ICI QUE SE FAIT L'AIGUILLAGE ---
             if self.parent:
-                self.parent.close() # Exemple: fermer le login
+                if role == 'administrateur':
+                    self.parent.afficher_admin()
+                elif role == 'gestionnaire':
+                    self.parent.afficher_gestionnaire()
+                elif role == 'lecture':
+                    # Si tu as un utilisateur "lecture seule", on peut renvoyer vers le planning public
+                    self.action_voir_planning()
+                else:
+                    QMessageBox.warning(self, "Erreur", f"Rôle inconnu : {role}")
         else:
             QMessageBox.warning(self, "Erreur", "Identifiants incorrects")
 
-# La classe Gestionnaire sert de Main Window (conteneur)
+
+# Classe principale (Conteneur)
 class Gestionnaire(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -100,7 +111,16 @@ class Gestionnaire(QMainWindow):
         self.afficher_login()
 
     def afficher_login(self):
+        """Affiche l'écran de connexion."""
         self.setCentralWidget(InterfaceLogin(self))
+
+    def afficher_admin(self):
+        """Affiche l'écran Administrateur."""
+        self.setCentralWidget(FenetreAdministrateur())
+
+    def afficher_gestionnaire(self):
+        """Affiche l'écran Gestionnaire."""
+        self.setCentralWidget(FenetreGestionnaire())
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

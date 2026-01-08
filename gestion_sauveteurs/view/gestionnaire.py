@@ -3,51 +3,59 @@ from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget, QPushButton, QLabel,
     QVBoxLayout, QHBoxLayout, QTableWidget, QLineEdit,
     QFormLayout, QStackedWidget, QTableWidgetItem,
-    QHeaderView
+    QHeaderView, QMessageBox, QComboBox, QDateTimeEdit, QDialog # <--- Ajout de QDialog
 )
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QDateTime
 
+# Imports Backend
+from gestion_sauveteurs.crud.sauveteur import SauveteurCRUD
+from gestion_sauveteurs.crud.planning import PlanningCRUD
+# --- IMPORT DU PLANNING PUBLIC (Réutilisation) ---
+from gestion_sauveteurs.view.planning_public import InterfacePlanning
 
-class InterfacePlanning(QWidget):
+# --- NOUVELLE CLASSE : Dialogue de suppression ---
+class DialogueSupprimerMission(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
+        self.setWindowTitle("Supprimer une mission")
+        self.setFixedSize(300, 150)
+        self.crud_planning = PlanningCRUD() # Moteur BDD
+
+        # Titre Rouge
+        lbl_titre = QLabel("Suppression Mission", self)
+        lbl_titre.setAlignment(Qt.AlignCenter)
+        lbl_titre.setStyleSheet("background-color: #d32f2f; color: white; font-weight: bold; padding: 5px;")
+        lbl_titre.setGeometry(0, 0, 300, 30)
+
+        layout = QVBoxLayout()
+        layout.setContentsMargins(20, 40, 20, 20)
         
-        layout_principal = QVBoxLayout(self)
-        layout_principal.setContentsMargins(0, 0, 0, 0)
+        # Champ ID
+        layout_h = QHBoxLayout()
+        layout_h.addWidget(QLabel("ID de la mission :"))
+        self.champ_id = QLineEdit()
+        self.champ_id.setPlaceholderText("Ex: 42")
+        layout_h.addWidget(self.champ_id)
+        layout.addLayout(layout_h)
 
-        barre_titre = QLabel("Le Planning")
-        barre_titre.setAlignment(Qt.AlignCenter)
-        barre_titre.setFixedHeight(40)
-        barre_titre.setStyleSheet("""
-            background-color: #0b6fa4; 
-            color: white; 
-            font-weight: bold;
-        """)
-        layout_principal.addWidget(barre_titre)
+        # Bouton Action
+        self.btn_supprimer = QPushButton("Supprimer")
+        self.btn_supprimer.setStyleSheet("background-color: #d32f2f; color: white;")
+        self.btn_supprimer.clicked.connect(self.action_supprimer)
+        layout.addWidget(self.btn_supprimer)
 
-        self.table = QTableWidget(3, 7)
-        self.table.setStyleSheet("""
-            QTableWidget { 
-                border: 1px solid #ccc;
-            }
-            QHeaderView::section { 
-                background-color: #0b6fa4; 
-                color: white; 
-                font-weight: bold;
-                padding: 8px;
-            }
-        """)
+        self.setLayout(layout)
 
-        self.table.setHorizontalHeaderLabels(["10:30", "11:00", "11:30", "12:00", "12:30", "13:00", "13:30"])
-        self.table.setVerticalHeaderLabels(["René lapin", "Albert Zorg", "Romain AL"])
-        self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        self.table.verticalHeader().setSectionResizeMode(QHeaderView.Stretch)
-
-        item = QTableWidgetItem("pre")
-        item.setTextAlignment(Qt.AlignCenter)
-        self.table.setItem(1, 2, item)
-
-        layout_principal.addWidget(self.table)
+    def action_supprimer(self):
+        id_mission = self.champ_id.text()
+        if id_mission:
+            if self.crud_planning.supprimer_mission(id_mission):
+                QMessageBox.information(self, "Succès", f"Mission {id_mission} supprimée.")
+                self.accept() # Ferme la fenêtre
+            else:
+                QMessageBox.warning(self, "Erreur", "ID introuvable ou erreur BDD.")
+        else:
+            QMessageBox.warning(self, "Attention", "Veuillez entrer un ID.")
 
 
 class MainWindow(QMainWindow):
@@ -55,6 +63,10 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle("Gestionnaire")
         self.resize(1000, 600)
+        
+        # Moteurs BDD
+        self.crud_sauveteur = SauveteurCRUD()
+        self.crud_planning = PlanningCRUD()
 
         main_widget = QWidget()
         main_layout = QHBoxLayout(main_widget)
@@ -66,96 +78,85 @@ class MainWindow(QMainWindow):
         menu_layout = QVBoxLayout(menu_widget)
         menu_layout.setSpacing(5)
 
-        # Titre
         menu_label = QLabel("Gestionnaire")
         menu_label.setAlignment(Qt.AlignCenter)
         menu_label.setFixedHeight(40)
-        menu_label.setStyleSheet("""
-            background-color: #0b6fa4; 
-            color: white; 
-            font-weight: bold;
-        """)
+        menu_label.setStyleSheet("background-color: #0b6fa4; color: white; font-weight: bold;")
         menu_layout.addWidget(menu_label)
 
-        # Boutons
-        btn_infos = QPushButton("informations générales")
-        btn_add_h = QPushButton("ajouter horaire")
-        btn_del_h = QPushButton("supprimer horaire")
+        self.btn_infos = QPushButton("informations générales")
+        self.btn_add_h = QPushButton("ajouter horaire")
+        
+        self.btn_infos.clicked.connect(self.show_infos)
+        self.btn_add_h.clicked.connect(self.show_add_horaire)
 
-        btn_infos.clicked.connect(self.show_infos)
-        btn_add_h.clicked.connect(self.show_add_horaire)
-        btn_del_h.clicked.connect(self.show_del_horaire)
-
-        for btn in [btn_infos, btn_add_h, btn_del_h]:
+        for btn in [self.btn_infos, self.btn_add_h]:
             btn.setFixedHeight(40)
             menu_layout.addWidget(btn)
 
         menu_layout.addStretch()
 
-        # ===== ZONE CENTRALE =====
+        # ===== ZONE CENTRALE (QStackedWidget) =====
         self.stack = QStackedWidget()
 
-        # Page VIDE au démarrage
-        self.page_vide = QWidget()
-        self.stack.addWidget(self.page_vide)
-
-        # Page informations générales
         self.page_infos = self.create_infos_page()
         self.stack.addWidget(self.page_infos)
 
-        # Page ajouter horaire
         self.page_add_horaire = self.create_add_horaire_page()
         self.stack.addWidget(self.page_add_horaire)
 
-        # Page supprimer horaire
-        self.page_del_horaire = self.create_del_horaire_page()
-        self.stack.addWidget(self.page_del_horaire)
-
-        # Page ajouter sauveteur
         self.page_add_sauveteur = self.create_add_sauveteur_page()
         self.stack.addWidget(self.page_add_sauveteur)
 
-        # Page supprimer sauveteur
-        self.page_del_sauveteur = self.create_del_sauveteur_page()
-        self.stack.addWidget(self.page_del_sauveteur)
+        self.stack.setCurrentWidget(self.page_infos)
 
-        # Afficher page vide au début
-        self.stack.setCurrentWidget(self.page_vide)
-
-        # ===== PLANNING =====
+        # ===== PLANNING (Réutilisé) =====
         self.planning_widget = InterfacePlanning()
 
-        # ===== ASSEMBLAGE =====
+        # --- BOUTON SUPPRIMER PAR ID ---
+        self.btn_del_mission = QPushButton("🗑️ Supprimer une mission (via ID)")
+        self.btn_del_mission.setStyleSheet("background-color: #d32f2f; color: white; font-weight: bold; padding: 8px;")
+        self.btn_del_mission.clicked.connect(self.ouvrir_suppression_mission)
+
+        # Assemblage
         main_layout.addWidget(menu_widget, 1)
-        main_layout.addWidget(self.stack, 2)
-        main_layout.addWidget(self.planning_widget, 2)
+        
+        right_layout = QVBoxLayout()
+        right_layout.addWidget(self.stack, 2)
+        right_layout.addWidget(self.planning_widget, 2)
+        right_layout.addWidget(self.btn_del_mission) # <--- Bouton ajouté ici
+        
+        main_layout.addLayout(right_layout, 4)
 
         self.setCentralWidget(main_widget)
+        self.charger_tableau_sauveteurs()
+
+    # --- PAGES ---
 
     def create_infos_page(self):
         page = QWidget()
         layout = QVBoxLayout(page)
-        layout.setSpacing(10)
-
-        title = QLabel("informations générales")
+        
+        title = QLabel("Informations Générales (Sauveteurs)")
+        title.setStyleSheet("font-weight: bold; font-size: 14px;")
         layout.addWidget(title)
 
-        table = QTableWidget(0, 5)
-        table.setHorizontalHeaderLabels(["Id", "Nom", "Prenom", "spécialité", "Département"])
-        table.horizontalHeader().setStretchLastSection(True)
-        layout.addWidget(table)
+        self.table_sauveteurs = QTableWidget()
+        colonnes = ["ID", "Nom", "Prenom", "Spécialité", "Département"]
+        self.table_sauveteurs.setColumnCount(len(colonnes))
+        self.table_sauveteurs.setHorizontalHeaderLabels(colonnes)
+        self.table_sauveteurs.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        layout.addWidget(self.table_sauveteurs)
 
         btn_layout = QHBoxLayout()
-        btn_add = QPushButton("ajouter sauveteur")
-        btn_del = QPushButton("supprimer sauveteur")
+        btn_add = QPushButton("Ajouter Sauveteur")
+        btn_del = QPushButton("Supprimer Sauveteur")
         
         btn_add.clicked.connect(self.show_add_sauveteur)
-        btn_del.clicked.connect(self.show_del_sauveteur)
+        btn_del.clicked.connect(self.action_supprimer_sauveteur)
         
         btn_layout.addWidget(btn_add)
         btn_layout.addWidget(btn_del)
-        btn_layout.addStretch()
-        
         layout.addLayout(btn_layout)
         
         return page
@@ -163,130 +164,135 @@ class MainWindow(QMainWindow):
     def create_add_horaire_page(self):
         page = QWidget()
         layout = QVBoxLayout(page)
-        layout.setSpacing(10)
-
-        title = QLabel("ajouter horaire")
+        
+        title = QLabel("Ajouter une Mission / Horaire")
         layout.addWidget(title)
-
+        
         form = QFormLayout()
         
-        nom = QLineEdit()
-        debut = QLineEdit()
-        fin = QLineEdit()
+        self.combo_sauv_mission = QComboBox()
+        self.date_debut = QDateTimeEdit(QDateTime.currentDateTime())
+        self.date_fin = QDateTimeEdit(QDateTime.currentDateTime().addSecs(3600))
+        self.input_mission = QLineEdit()
+        self.input_mission.setPlaceholderText("Ex: Surveillance Plage")
         
-        form.addRow("nom", nom)
-        form.addRow("debut", debut)
-        form.addRow("fin", fin)
+        form.addRow("Sauveteur:", self.combo_sauv_mission)
+        form.addRow("Début:", self.date_debut)
+        form.addRow("Fin:", self.date_fin)
+        form.addRow("Mission:", self.input_mission)
         
-        btn = QPushButton("ajouter")
-        form.addRow("", btn)
-        
-        layout.addLayout(form)
-        
-        return page
-
-    def create_del_horaire_page(self):
-        page = QWidget()
-        layout = QVBoxLayout(page)
-        layout.setSpacing(10)
-
-        title = QLabel("supprimer horaire")
-        layout.addWidget(title)
-
-        form = QFormLayout()
-        
-        nom = QLineEdit()
-        debut = QLineEdit()
-        fin = QLineEdit()
-        
-        form.addRow("Nom", nom)
-        form.addRow("debut", debut)
-        form.addRow("fin", fin)
-        
-        btn = QPushButton("supprimer")
-        form.addRow("", btn)
+        btn_valider = QPushButton("Ajouter au planning")
+        btn_valider.clicked.connect(self.action_valider_mission)
+        form.addRow("", btn_valider)
         
         layout.addLayout(form)
-        
         return page
 
     def create_add_sauveteur_page(self):
         page = QWidget()
         layout = QVBoxLayout(page)
-        layout.setSpacing(10)
-
-        title = QLabel("ajouter sauveteur")
+        
+        title = QLabel("Nouveau Sauveteur")
         layout.addWidget(title)
 
         form = QFormLayout()
+        self.input_nom = QLineEdit()
+        self.input_prenom = QLineEdit()
+        self.input_spec = QLineEdit()
+        self.input_dep = QLineEdit()
         
-        nom = QLineEdit()
-        prenom = QLineEdit()
-        specialite = QLineEdit()
-        departement = QLineEdit()
+        form.addRow("Nom:", self.input_nom)
+        form.addRow("Prénom:", self.input_prenom)
+        form.addRow("Spécialité:", self.input_spec)
+        form.addRow("Département:", self.input_dep)
         
-        form.addRow("Nom:", nom)
-        form.addRow("Prenom:", prenom)
-        form.addRow("Spécialité:", specialite)
-        form.addRow("département:", departement)
+        btn_box = QHBoxLayout()
+        btn_add = QPushButton("Enregistrer")
+        btn_add.clicked.connect(self.action_valider_sauveteur)
         
-        btn_layout = QHBoxLayout()
-        btn_ajouter = QPushButton("ajouter")
-        btn_retour = QPushButton("← Retour")
-        btn_retour.clicked.connect(self.show_infos)
+        btn_back = QPushButton("Annuler")
+        btn_back.clicked.connect(self.show_infos)
         
-        btn_layout.addWidget(btn_ajouter)
-        btn_layout.addWidget(btn_retour)
-        btn_layout.addStretch()
+        btn_box.addWidget(btn_add)
+        btn_box.addWidget(btn_back)
         
-        form.addRow("", btn_layout)
         layout.addLayout(form)
-        
+        layout.addLayout(btn_box)
+        layout.addStretch()
         return page
 
-    def create_del_sauveteur_page(self):
-        page = QWidget()
-        layout = QVBoxLayout(page)
-        layout.setSpacing(10)
+    # --- ACTIONS ---
 
-        title = QLabel("supprimer sauveteur")
-        layout.addWidget(title)
-
-        form = QFormLayout()
-        
-        id_field = QLineEdit()
-        form.addRow("Id", id_field)
-        
-        btn_layout = QHBoxLayout()
-        btn_supprimer = QPushButton("supprimer")
-        btn_retour = QPushButton("← Retour")
-        btn_retour.clicked.connect(self.show_infos)
-        
-        btn_layout.addWidget(btn_supprimer)
-        btn_layout.addWidget(btn_retour)
-        btn_layout.addStretch()
-        
-        form.addRow("", btn_layout)
-        layout.addLayout(form)
-        
-        return page
-
-    # Actions
     def show_infos(self):
+        self.charger_tableau_sauveteurs()
         self.stack.setCurrentWidget(self.page_infos)
 
     def show_add_horaire(self):
+        self.combo_sauv_mission.clear()
+        sauveteurs = self.crud_sauveteur.get_tous()
+        for s in sauveteurs:
+            self.combo_sauv_mission.addItem(f"{s['nom']} {s['prenom']}", s['id'])
         self.stack.setCurrentWidget(self.page_add_horaire)
-
-    def show_del_horaire(self):
-        self.stack.setCurrentWidget(self.page_del_horaire)
 
     def show_add_sauveteur(self):
         self.stack.setCurrentWidget(self.page_add_sauveteur)
 
-    def show_del_sauveteur(self):
-        self.stack.setCurrentWidget(self.page_del_sauveteur)
+    def action_valider_sauveteur(self):
+        nom = self.input_nom.text()
+        prenom = self.input_prenom.text()
+        spec = self.input_spec.text()
+        dep = self.input_dep.text()
+        
+        if nom and prenom:
+            self.crud_sauveteur.ajouter(nom, prenom, dep, spec)
+            QMessageBox.information(self, "OK", "Sauveteur ajouté")
+            self.input_nom.clear(); self.input_prenom.clear()
+            self.show_infos()
+        else:
+            QMessageBox.warning(self, "Erreur", "Champs obligatoires manquants")
 
+    def action_valider_mission(self):
+        sauv_id = self.combo_sauv_mission.currentData()
+        debut = self.date_debut.dateTime().toString("yyyy-MM-dd HH:mm:ss")
+        fin = self.date_fin.dateTime().toString("yyyy-MM-dd HH:mm:ss")
+        mission = self.input_mission.text()
+        
+        if sauv_id:
+            self.crud_planning.ajouter_mission(sauv_id, debut, fin, mission)
+            QMessageBox.information(self, "OK", "Mission ajoutée")
+            self.planning_widget.charger_donnees() 
+        else:
+            QMessageBox.warning(self, "Erreur", "Sélectionnez un sauveteur")
+
+    def action_supprimer_sauveteur(self):
+        row = self.table_sauveteurs.currentRow()
+        if row >= 0:
+            id_sauv = self.table_sauveteurs.item(row, 0).text()
+            nom = self.table_sauveteurs.item(row, 1).text()
+            if QMessageBox.question(self, "Confirm", f"Supprimer {nom} ?") == QMessageBox.Yes:
+                self.crud_sauveteur.supprimer(id_sauv)
+                self.charger_tableau_sauveteurs()
+        else:
+            QMessageBox.warning(self, "Attention", "Sélectionnez une ligne")
+            
+    def charger_tableau_sauveteurs(self):
+        data = self.crud_sauveteur.get_tous()
+        self.table_sauveteurs.setRowCount(0)
+        for i, s in enumerate(data):
+            self.table_sauveteurs.insertRow(i)
+            self.table_sauveteurs.setItem(i, 0, QTableWidgetItem(str(s['id'])))
+            self.table_sauveteurs.setItem(i, 1, QTableWidgetItem(s['nom']))
+            self.table_sauveteurs.setItem(i, 2, QTableWidgetItem(s['prenom']))
+            self.table_sauveteurs.setItem(i, 3, QTableWidgetItem(s['specialite']))
+            self.table_sauveteurs.setItem(i, 4, QTableWidgetItem(s['departement']))
+
+    # --- NOUVELLE ACTION POUR SUPPRIMER MISSION (PAR ID) ---
+    def ouvrir_suppression_mission(self):
+        # On ouvre la petite fenêtre popup
+        dialog = DialogueSupprimerMission(self)
+        if dialog.exec_(): # Si l'utilisateur a supprimé avec succès
+            # On rafraîchit le tableau du planning
+            self.planning_widget.charger_donnees()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
