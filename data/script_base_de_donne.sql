@@ -1,4 +1,4 @@
--- Table des utilisateurs (Admin, Gestionnaire, Lecture)
+--Table des utilisateurs (Admin, Gestionnaire, Lecture)
 CREATE TABLE IF NOT EXISTS utilisateur (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     identifiant TEXT NOT NULL UNIQUE,
@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS sauveteur (
     departement TEXT,
     specialite TEXT NOT NULL,
     statut TEXT DEFAULT 'disponible' 
-    -- statuts : disponible, approche, sous_terre, gestion, exterieur, repos, civiere
+    -- statuts : disponible, approche, sous_terre, gestion, exterieur, repos, civiere, ....
 );
 
 -- Table du planning (Lien Sauveteur <-> Créneau horaire)
@@ -22,12 +22,13 @@ CREATE TABLE IF NOT EXISTS sauveteur (
 CREATE TABLE IF NOT EXISTS planning (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     sauveteur_id INTEGER,
-    heure_debut DATETIME, -- Format ISO8601 recommandé
-    heure_fin DATETIME,     
-    statut_mission TEXT, 
+    heure_debut DATETIME,
+    heure_fin DATETIME,
+    statut_mission TEXT,
+    lieu TEXT DEFAULT '', -- <--- NOUVELLE COLONNE
     FOREIGN KEY(sauveteur_id) REFERENCES sauveteur(id) ON DELETE CASCADE
 );
 
 -- Insertion d'un admin par défaut pour ne pas être bloqué
 INSERT OR IGNORE INTO utilisateur (identifiant, mot_de_passe, role) 
-VALUES ('admin', 'admin', 'administrateur');                    
+VALUES ('admin', 'admin', 'administrateur');     

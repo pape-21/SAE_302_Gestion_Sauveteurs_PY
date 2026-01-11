@@ -14,14 +14,15 @@ class PlanningCRUD:
         """Récupère le planning complet avec les détails des sauveteurs.
 
         Returns:
-            list[tuple]: Liste de tuples (id, nom_sauveteur, debut, fin, statut).
+            list: Liste (id, nom_sauveteur, debut, fin, statut, lieu).
         """
         conn = self.db_manager.get_connection()
         try:
             cursor = conn.cursor()
+            # Ajout de p.lieu dans la requête
             sql = """
                 SELECT p.id, s.nom || ' ' || s.prenom as sauveteur_nom, 
-                       p.heure_debut, p.heure_fin, p.statut_mission
+                       p.heure_debut, p.heure_fin, p.statut_mission, p.lieu
                 FROM planning p
                 JOIN sauveteur s ON p.sauveteur_id = s.id
                 ORDER BY p.heure_debut DESC
@@ -44,8 +45,10 @@ class PlanningCRUD:
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
         try:
+            # Ajout de p.lieu dans la requête
             sql = f"""
-            SELECT p.id, p.heure_debut, p.heure_fin, p.statut_mission, s.nom, s.prenom, s.specialite
+            SELECT p.id, p.heure_debut, p.heure_fin, p.statut_mission, p.lieu,
+                   s.nom, s.prenom, s.specialite
             FROM planning p
             JOIN sauveteur s ON p.sauveteur_id = s.id
             WHERE p.heure_debut LIKE '{date_operation}%' 
@@ -59,34 +62,36 @@ class PlanningCRUD:
         finally:
             conn.close()
 
-    def ajouter_mission(self, sauveteur_id, heure_debut, heure_fin, mission):
+    def ajouter_mission(self, sauveteur_id, heure_debut, heure_fin, mission, lieu=""):
         """Ajoute une mission au planning.
 
         Args:
-            sauveteur_id (int): L'ID du sauveteur concerné.
-            heure_debut (str): Date/Heure de début (ISO format).
-            heure_fin (str): Date/Heure de fin (ISO format).
-            mission (str): Description de la mission.
+            sauveteur_id (int): L'identifiant du sauveteur.
+            heure_debut (str): Date et heure de début.
+            heure_fin (str): Date et heure de fin.
+            mission (str): Le statut ou nom de la mission.
+            lieu (str, optional): Le lieu de la mission. Par défaut "".
 
         Returns:
-            int | None: L'ID de la mission créée ou None.
+            int: L'ID de la mission créée ou None en cas d'erreur.
         """
         conn = self.db_manager.get_connection()
         cursor = conn.cursor()
         try:
             sql = """
-            INSERT INTO planning (sauveteur_id, heure_debut, heure_fin, statut_mission)
-            VALUES (?, ?, ?, ?)
+            INSERT INTO planning (sauveteur_id, heure_debut, heure_fin, statut_mission, lieu)
+            VALUES (?, ?, ?, ?, ?)
             """
-            cursor.execute(sql, (sauveteur_id, heure_debut, heure_fin, mission))
+            # On passe le lieu dans la requête
+            cursor.execute(sql, (sauveteur_id, heure_debut, heure_fin, mission, lieu))
             conn.commit()
             return cursor.lastrowid
-        except sqlite3.Error as e:
+        except Exception as e:
             print(f"Erreur ajout mission: {e}")
             return None
         finally:
             conn.close()
-            
+
     def supprimer_mission(self, id_mission):
         """Supprime une mission du planning.
 
@@ -101,7 +106,7 @@ class PlanningCRUD:
             cursor = conn.cursor()
             cursor.execute("DELETE FROM planning WHERE id=?", (id_mission,))
             conn.commit()
-            return cursor.rowcount > 0
+            return cursor.rowcount > 0          
         except sqlite3.Error as e:
             print(f"Erreur suppression mission : {e}")
             return False

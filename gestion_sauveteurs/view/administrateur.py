@@ -27,11 +27,9 @@ class DialogueAjoutUtilisateur(QDialog):
         
         # Champs
         self.champ_identifiant = QLineEdit()
-        self.champ_identifiant.setPlaceholderText("Ex: dupont_j")
         
         self.champ_mdp = QLineEdit() 
         self.champ_mdp.setEchoMode(QLineEdit.Password)
-        self.champ_mdp.setPlaceholderText("Mot de passe")
 
         self.combo_role = QComboBox()
         self.combo_role.addItems(["administrateur", "gestionnaire", "lecture"])
@@ -154,15 +152,15 @@ class FenetreAdministrateur(QWidget):
             QPushButton:hover { background-color: #e0e0e0; }
         """
 
-        self.btn_ajouter = QPushButton("➕ Ajouter un utilisateur")
+        self.btn_ajouter = QPushButton("Ajouter un utilisateur")
         self.btn_ajouter.setStyleSheet(style_btn)
         self.btn_ajouter.clicked.connect(self.ouvrir_ajout)
 
-        self.btn_supprimer = QPushButton("🗑️ Supprimer un utilisateur")
+        self.btn_supprimer = QPushButton("Supprimer un utilisateur")
         self.btn_supprimer.setStyleSheet(style_btn)
         self.btn_supprimer.clicked.connect(self.ouvrir_suppression)
         
-        self.btn_refresh = QPushButton("🔄 Actualiser la liste")
+        self.btn_refresh = QPushButton("Actualiser la liste")
         self.btn_refresh.setStyleSheet(style_btn)
         self.btn_refresh.clicked.connect(self.charger_donnees)
 

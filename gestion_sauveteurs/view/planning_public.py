@@ -2,15 +2,17 @@ import sys
 from PyQt5.QtWidgets import (QApplication, QWidget, QLabel, QVBoxLayout, QTableWidget, 
                              QTableWidgetItem, QHeaderView, QMessageBox)
 from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QColor 
 from gestion_sauveteurs.database import DatabaseManager
 
 class InterfacePlanning(QWidget):
     """Widget affichant le planning complet (lecture seule)."""
+    
     def __init__(self, parent=None):
         super().__init__(parent)
         self.db_manager = DatabaseManager()
-        self.setWindowTitle("Planning Public") # Titre de la fenêtre si autonome
-        self.resize(800, 500)
+        self.setWindowTitle("Planning Public")
+        self.resize(900, 500) # Un peu plus large pour la nouvelle colonne
 
         # --- STYLE ---
         self.setStyleSheet("background-color: #e9e4de;")
@@ -19,7 +21,7 @@ class InterfacePlanning(QWidget):
         layout_principal.setContentsMargins(0, 0, 0, 0)
 
         # Bandeau Titre
-        barre_titre = QLabel("Le Planning")
+        barre_titre = QLabel("Le Planning Opérationnel")
         barre_titre.setAlignment(Qt.AlignCenter)
         barre_titre.setFixedHeight(40)
         barre_titre.setStyleSheet("background-color: #0b6fa4; color: white; font-weight: bold;")
@@ -32,8 +34,8 @@ class InterfacePlanning(QWidget):
             QHeaderView::section { background-color: #0b6fa4; color: white; font-weight: bold; padding: 8px; }
         """)
 
-        # Colonnes
-        colonnes = ["Sauveteur", "Début", "Fin", "Mission"]
+        # --- MODIF 1 : Ajout de la colonne "Lieu" ---
+        colonnes = ["Sauveteur", "Début", "Fin", "Mission", "Lieu"]
         self.table.setColumnCount(len(colonnes))
         self.table.setHorizontalHeaderLabels(colonnes)
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
@@ -45,13 +47,14 @@ class InterfacePlanning(QWidget):
         self.charger_donnees()
 
     def charger_donnees(self):
-        """Récupère tout le planning."""
+        """Récupère tout le planning avec la localité."""
         conn = self.db_manager.get_connection()
         conn.row_factory = None
         cursor = conn.cursor()
         try:
+            # --- MODIF 2 : On récupère aussi 'p.lieu' dans le SQL ---
             sql = """
-                SELECT s.nom || ' ' || s.prenom, p.heure_debut, p.heure_fin, p.statut_mission
+                SELECT s.nom || ' ' || s.prenom, p.heure_debut, p.heure_fin, p.statut_mission, p.lieu
                 FROM planning p
                 JOIN sauveteur s ON p.sauveteur_id = s.id
                 ORDER BY p.heure_debut ASC
@@ -62,9 +65,36 @@ class InterfacePlanning(QWidget):
             self.table.setRowCount(0)
             for i, data in enumerate(lignes):
                 self.table.insertRow(i)
+                
+                # data = (Nom, Debut, Fin, Mission, Lieu)
+                # L'index 3 est toujours la Mission pour la couleur
+                statut_texte = str(data[3]).lower()
+                couleur_fond = QColor("white")
+                
+                # --- LOGIQUE COULEURS ---
+                if "disponible" in statut_texte:
+                    couleur_fond = QColor("lightgreen")
+                elif "approche" in statut_texte:
+                    couleur_fond = QColor("violet")
+                elif "sous terre" in statut_texte:
+                    couleur_fond = QColor("tan")
+                elif "gestion" in statut_texte:
+                    couleur_fond = QColor("yellow")
+                elif "extérieur" in statut_texte or "exterieur" in statut_texte:
+                    couleur_fond = QColor("orange")
+                elif "repos" in statut_texte:
+                    couleur_fond = QColor("lightblue")
+                elif "brancardage" in statut_texte or "civière" in statut_texte:
+                    couleur_fond = QColor("salmon")
+
+                # On boucle sur toutes les colonnes (maintenant 5)
                 for j, val in enumerate(data):
-                    item = QTableWidgetItem(str(val))
+                    # Si le lieu est None (vide), on affiche une chaine vide
+                    texte_cellule = str(val) if val is not None else ""
+                    
+                    item = QTableWidgetItem(texte_cellule)
                     item.setTextAlignment(Qt.AlignCenter)
+                    item.setBackground(couleur_fond)
                     self.table.setItem(i, j, item)
                     
         except Exception as e:
@@ -72,9 +102,8 @@ class InterfacePlanning(QWidget):
         finally:
             conn.close()
 
-# --- FONCTION DE LANCEMENT (Ajoutée) ---
 def lancer_planning_public():
-    """Lance le planning en mode lecture seule (bloquant)."""
+    """Lance le planning en mode lecture seule."""
     app = QApplication.instance()
     if not app:
         app = QApplication(sys.argv)

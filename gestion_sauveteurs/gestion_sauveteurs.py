@@ -1,6 +1,9 @@
 import sqlite3
 import json
+import sys
 from pathlib import Path
+from PyQt5.QtCore import QObject, pyqtSignal
+from PyQt5.QtWidgets import QApplication
 
 # --- IMPORTS VUES (POUR OUVRIR LES FENÊTRES) ---
 from gestion_sauveteurs.view.login import lancer_login
@@ -13,7 +16,7 @@ from gestion_sauveteurs.connexion_réseaux import pair, envoyer_message
 from gestion_sauveteurs.database import DatabaseManager
 
 # =============================================================================
-# CONFIGURATION
+# CONFIGURATION & SIGNAUX
 # =============================================================================
 
 # On calcule le chemin absolu pour éviter les erreurs de "fichier introuvable"
@@ -23,6 +26,10 @@ db_path = BASE_DIR / "data" / "sauveteurs.db"
 
 # Variable globale pour stocker les connexions réseaux actives
 reseau_sockets = []
+
+class SignauxApp(QObject):
+    mise_a_jour = pyqtSignal()
+pont_visuel = None 
 
 # =============================================================================
 # 1. LOGIQUE RÉSEAU (RÉCEPTION & ENVOI)
@@ -49,6 +56,9 @@ def traitement_message(message, adresse_ip):
             _appliquer_modification_planning(donnees)
         elif action == "suppression_planning":
             _appliquer_suppression_planning(donnees)
+        
+        # On notifie l'interface graphique si elle est ouverte
+        if pont_visuel: pont_visuel.mise_a_jour.emit()
             
     except Exception as e:
         print(f"[SYNC ERROR] Impossible d'appliquer la mise à jour : {e}")
@@ -78,6 +88,7 @@ def ajouter_sauveteur(nom, prenom, departement, specialite):
         }
     }
     envoyer_message(payload, reseau_sockets)
+    if pont_visuel: pont_visuel.mise_a_jour.emit()
 
 def modifier_sauveteur(id_sauveteur, nom, prenom, departement, specialite):
     conn = sqlite3.connect(db_path)
@@ -92,6 +103,7 @@ def modifier_sauveteur(id_sauveteur, nom, prenom, departement, specialite):
                      "departement": departement, "specialite": specialite }
     }
     envoyer_message(payload, reseau_sockets)
+    if pont_visuel: pont_visuel.mise_a_jour.emit()
 
 def supprimer_sauveteur(id_sauveteur):
     conn = sqlite3.connect(db_path)
@@ -104,22 +116,32 @@ def supprimer_sauveteur(id_sauveteur):
         "donnees": {"id": id_sauveteur}
     }
     envoyer_message(payload, reseau_sockets)
+    if pont_visuel: pont_visuel.mise_a_jour.emit()
 
-def ajouter_mission(sauveteur_id, debut, fin, type_mission):
+def ajouter_mission(sauveteur_id, debut, fin, type_mission, lieu=""):
+    """Ajoute une mission au planning (avec lieu optionnel) et diffuse au réseau."""
     conn = sqlite3.connect(db_path)
     cur = conn.cursor()
-    cur.execute("INSERT INTO planning (sauveteur_id, heure_debut, heure_fin, statut_mission) VALUES (?, ?, ?, ?)",
-                (sauveteur_id, debut, fin, type_mission))
+    # Mise à jour de la requête pour inclure le lieu
+    cur.execute("INSERT INTO planning (sauveteur_id, heure_debut, heure_fin, statut_mission, lieu) VALUES (?, ?, ?, ?, ?)",
+                (sauveteur_id, debut, fin, type_mission, lieu))
     new_id = cur.lastrowid
     conn.commit()
     conn.close()
 
     payload = {
         "action": "ajout_planning",
-        "donnees": { "id": new_id, "sauveteur_id": sauveteur_id, 
-                     "heure_debut": debut, "heure_fin": fin, "statut_mission": type_mission }
+        "donnees": { 
+            "id": new_id, 
+            "sauveteur_id": sauveteur_id, 
+            "heure_debut": debut, 
+            "heure_fin": fin, 
+            "statut_mission": type_mission,
+            "lieu": lieu # Envoi du lieu
+        }
     }
     envoyer_message(payload, reseau_sockets)
+    if pont_visuel: pont_visuel.mise_a_jour.emit()
 
 def modifier_mission(id_mission, sauveteur_id, debut, fin, type_mission):
     conn = sqlite3.connect(db_path)
@@ -134,6 +156,7 @@ def modifier_mission(id_mission, sauveteur_id, debut, fin, type_mission):
                      "heure_debut": debut, "heure_fin": fin, "statut_mission": type_mission }
     }
     envoyer_message(payload, reseau_sockets)
+    if pont_visuel: pont_visuel.mise_a_jour.emit()
 
 def supprimer_mission(id_mission):
     conn = sqlite3.connect(db_path)
@@ -146,6 +169,7 @@ def supprimer_mission(id_mission):
         "donnees": {"id": id_mission}
     }
     envoyer_message(payload, reseau_sockets)
+    if pont_visuel: pont_visuel.mise_a_jour.emit()
 
 
 # =============================================================================
@@ -174,8 +198,10 @@ def _appliquer_suppression_sauveteur(d):
 
 def _appliquer_ajout_planning(d):
     conn = sqlite3.connect(db_path)
-    conn.execute("INSERT OR IGNORE INTO planning (id, sauveteur_id, heure_debut, heure_fin, statut_mission) VALUES (?, ?, ?, ?, ?)",
-                 (d['id'], d['sauveteur_id'], d['heure_debut'], d['heure_fin'], d['statut_mission']))
+    # Récupération du lieu (vide si absent du message réseau)
+    lieu = d.get("lieu", "")
+    conn.execute("INSERT OR IGNORE INTO planning (id, sauveteur_id, heure_debut, heure_fin, statut_mission, lieu) VALUES (?, ?, ?, ?, ?, ?)",
+                 (d['id'], d['sauveteur_id'], d['heure_debut'], d['heure_fin'], d['statut_mission'], lieu))
     conn.commit()
     conn.close()
 
@@ -199,9 +225,13 @@ def _appliquer_suppression_planning(d):
 
 def main():
     """Point d'entrée principal de l'application."""
-    global reseau_sockets
+    global reseau_sockets, pont_visuel
 
     print("--- Démarrage de l'application ---")
+    
+    # Init Application + Signal
+    app = QApplication(sys.argv)
+    pont_visuel = SignauxApp()
     
     # 1. Init BDD
     print("Vérification de la base de données...")
@@ -209,11 +239,10 @@ def main():
     db_manager.initialiser()
     
     # 2. Init RÉSEAU (Serveur + Client)
-    # On passe 'traitement_message' pour qu'il soit appelé quand on reçoit quelque chose
     print("[RESEAU] Initialisation...")
     reseau_sockets = pair(callback_mise_a_jour=traitement_message)
     
-    # 3. Login (Bloquant)
+    # 3. Login
     print("Ouverture du login...")
     role_connecte = lancer_login()
 
@@ -225,8 +254,8 @@ def main():
             lancer_administrateur()
             
         elif role_connecte == "gestionnaire":
-            # Cette fois, on lance la vraie fenêtre !
-            lancer_gestionnaire()
+            # On passe le signal pour rafraîchir la vue gestionnaire
+            lancer_gestionnaire() 
             
         elif role_connecte == "lecture":
             lancer_planning_public()

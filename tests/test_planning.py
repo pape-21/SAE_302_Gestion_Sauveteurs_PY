@@ -1,49 +1,114 @@
-from datetime import datetime, timedelta
-from gestion_sauveteurs.crud.planning import PlanningCRUD
-from gestion_sauveteurs.crud.sauveteur import SauveteurCRUD # On a besoin d'un sauveteur pour tester
+import sqlite3
+from gestion_sauveteurs.database import DatabaseManager
 
-def main():
-    print("--- Test CRUD Planning ---")
-    planning_crud = PlanningCRUD()
-    sauveteur_crud = SauveteurCRUD()
+class PlanningCRUD:
+    """Classe de gestion des opérations CRUD pour le planning (missions).
+    """
 
-    # Étape 1 : S'assurer d'avoir un sauveteur à affecter
-    sauveteur_id = sauveteur_crud.ajouter("Trex", "Alan", "09", "communication")
-    if not sauveteur_id:
-        print("[ERREUR] Impossible de créer un sauveteur, vérifiez SauveteurCRUD.")
-        return
+    def __init__(self):
+        """Initialise le gestionnaire de base de données.
+        """
+        self.db_manager = DatabaseManager()
 
-    # Étape 2 : Définir des créneaux
-    debut = datetime.now()
-    fin = debut + timedelta(hours=3)
-    
-    debut_str = debut.strftime('%Y-%m-%d %H:%M:%S')
-    fin_str = fin.strftime('%Y-%m-%d %H:%M:%S')
-    date_jour = debut.strftime('%Y-%m-%d')
+    def get_tous_details(self):
+        """Récupère le planning complet avec les détails des sauveteurs.
 
-    # 3. Ajout d'une mission
-    print(f"\n3. Ajout d'une mission pour le sauveteur ID {sauveteur_id}...")
-    mission_id = planning_crud.ajouter_mission(
-        sauveteur_id,
-        debut_str,
-        fin_str,
-        "sous_terre"
-    )
-    print(f"   -> Mission ajoutée avec ID : {mission_id}")
+        Returns:
+            list: Liste (id, nom_sauveteur, debut, fin, statut, lieu).
+        """
+        conn = self.db_manager.get_connection()
+        try:
+            cursor = conn.cursor()
+            # Ajout de p.lieu dans la requête
+            sql = """
+                SELECT p.id, s.nom || ' ' || s.prenom as sauveteur_nom, 
+                       p.heure_debut, p.heure_fin, p.statut_mission, p.lieu
+                FROM planning p
+                JOIN sauveteur s ON p.sauveteur_id = s.id
+                ORDER BY p.heure_debut DESC
+            """
+            cursor.execute(sql)
+            return cursor.fetchall()
+        finally:
+            conn.close()
 
-    # 4. Lecture du planning global
-    print(f"\n4. Lecture du planning pour la date {date_jour}...")
-    planning = planning_crud.get_planning_global(date_jour)
+    def get_planning_global(self, date_operation):
+        """Récupère les missions pour une date donnée.
 
-    if planning:
-        print(f"   [OK] {len(planning)} entrée(s) trouvée(s).")
-# NOUVEAU CODE (Correction de la clé)
-        print(f"   -> Mission : {planning[0]['statut_mission']} | Sauveteur : {planning[0]['prenom']} {planning[0]['nom']}")
-    else:
-        print("   [ERREUR] Aucune entrée de planning trouvée.")
-        
-    # Nettoyage
-    sauveteur_crud.supprimer(sauveteur_id)
+        Args:
+            date_operation (str): La date au format 'YYYY-MM-DD'.
 
-if __name__ == "__main__":
-    main()
+        Returns:
+            list[dict]: Liste des missions avec détails du sauveteur.
+        """
+        conn = self.db_manager.get_connection()
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        try:
+            # Ajout de p.lieu dans la requête
+            sql = f"""
+            SELECT p.id, p.heure_debut, p.heure_fin, p.statut_mission, p.lieu,
+                   s.nom, s.prenom, s.specialite
+            FROM planning p
+            JOIN sauveteur s ON p.sauveteur_id = s.id
+            WHERE p.heure_debut LIKE '{date_operation}%' 
+            ORDER BY p.heure_debut
+            """
+            cursor.execute(sql)
+            return [dict(row) for row in cursor.fetchall()]
+        except sqlite3.Error as e:
+            print(f"Erreur de lecture du planning : {e}")
+            return []
+        finally:
+            conn.close()
+
+    def ajouter_mission(self, sauveteur_id, heure_debut, heure_fin, mission, lieu=""):
+        """Ajoute une mission au planning.
+
+        Args:
+            sauveteur_id (int): L'identifiant du sauveteur.
+            heure_debut (str): Date et heure de début.
+            heure_fin (str): Date et heure de fin.
+            mission (str): Le statut ou nom de la mission.
+            lieu (str, optional): Le lieu de la mission. Par défaut "".
+
+        Returns:
+            int: L'ID de la mission créée ou None en cas d'erreur.
+        """
+        conn = self.db_manager.get_connection()
+        cursor = conn.cursor()
+        try:
+            sql = """
+            INSERT INTO planning (sauveteur_id, heure_debut, heure_fin, statut_mission, lieu)
+            VALUES (?, ?, ?, ?, ?)
+            """
+            # On passe le lieu dans la requête
+            cursor.execute(sql, (sauveteur_id, heure_debut, heure_fin, mission, lieu))
+            conn.commit()
+            return cursor.lastrowid
+        except Exception as e:
+            print(f"Erreur ajout mission: {e}")
+            return None
+        finally:
+            conn.close()
+
+    def supprimer_mission(self, id_mission):
+        """Supprime une mission du planning.
+
+        Args:
+            id_mission (int | str): L'ID de la mission à supprimer.
+
+        Returns:
+            bool: True si la suppression a réussi, False sinon.
+        """
+        conn = self.db_manager.get_connection()
+        try:
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM planning WHERE id=?", (id_mission,))
+            conn.commit()
+            return cursor.rowcount > 0          
+        except sqlite3.Error as e:
+            print(f"Erreur suppression mission : {e}")
+            return False
+        finally:
+            conn.close()

@@ -11,20 +11,14 @@ from PyQt5.QtCore import Qt, QDateTime
 from gestion_sauveteurs.crud.sauveteur import SauveteurCRUD
 from gestion_sauveteurs.crud.planning import PlanningCRUD
 from gestion_sauveteurs.view.planning_public import InterfacePlanning
-from gestion_sauveteurs.view.bouton_refresh import BoutonRefresh
 
-# --- IMPORTANT : ON A SUPPRIMÉ L'IMPORT CIRCULAIRE ICI ---
-# (On fera les imports DANS les méthodes)
-
-# --- NOUVELLE CLASSE : Dialogue de suppression ---
+# --- DIALOGUE DE SUPPRESSION ---
 class DialogueSupprimerMission(QDialog):
     """Dialogue modal pour supprimer une mission par son ID."""
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Supprimer une mission")
         self.setFixedSize(300, 150)
-        # On garde le CRUD ici juste pour vérifier si besoin, 
-        # mais l'action passera par le réseau.
         
         lbl_titre = QLabel("Suppression Mission", self)
         lbl_titre.setAlignment(Qt.AlignCenter)
@@ -33,16 +27,10 @@ class DialogueSupprimerMission(QDialog):
 
         layout = QVBoxLayout()
         layout.setContentsMargins(20, 40, 20, 20)
-
-        #bouton refresh réutilisé
-        self.btn_refresh = BoutonRefresh(self.refresh_planning)
-        layout.addWidget(self.btn_refresh)
-
         
         layout_h = QHBoxLayout()
         layout_h.addWidget(QLabel("ID de la mission :"))
         self.champ_id = QLineEdit()
-        self.champ_id.setPlaceholderText("Ex: 42")
         layout_h.addWidget(self.champ_id)
         layout.addLayout(layout_h)
 
@@ -73,7 +61,6 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Espace Gestionnaire")
         self.resize(1000, 600)
         
-        # Pour la lecture (affichage des tableaux), on garde le CRUD direct
         self.crud_sauveteur = SauveteurCRUD()
         self.crud_planning = PlanningCRUD()
 
@@ -120,7 +107,7 @@ class MainWindow(QMainWindow):
         self.planning_widget = InterfacePlanning()
 
         # Bouton supprimer mission
-        self.btn_del_mission = QPushButton("🗑️ Supprimer une mission (via ID)")
+        self.btn_del_mission = QPushButton("Supprimer une mission (via ID)")
         self.btn_del_mission.setStyleSheet("background-color: #d32f2f; color: white; font-weight: bold; padding: 8px;")
         self.btn_del_mission.clicked.connect(self.ouvrir_suppression_mission)
 
@@ -160,21 +147,40 @@ class MainWindow(QMainWindow):
         layout.addLayout(btn_layout)
         return page
 
+    # --- MODIFICATION ICI : MENU DÉROULANT POUR LA MISSION ---
     def create_add_horaire_page(self):
         page = QWidget()
         layout = QVBoxLayout(page)
         title = QLabel("Ajouter une Mission / Horaire")
         layout.addWidget(title)
         form = QFormLayout()
+        
         self.combo_sauv_mission = QComboBox()
         self.date_debut = QDateTimeEdit(QDateTime.currentDateTime())
         self.date_fin = QDateTimeEdit(QDateTime.currentDateTime().addSecs(3600))
-        self.input_mission = QLineEdit()
-        self.input_mission.setPlaceholderText("Ex: Surveillance Plage")
+        
+        # 1. Champ LIEU (Texte libre)
+        self.input_lieu = QLineEdit()
+
+        # 2. Champ MISSION (Menu Déroulant / ComboBox)
+        self.combo_mission = QComboBox()
+        # Liste exacte pour correspondre aux couleurs du planning
+        self.combo_mission.addItems([
+            "disponible", 
+            "approche", 
+            "sous terre", 
+            "gestion", 
+            "extérieur", 
+            "repos", 
+            "brancardage civière"
+        ])
+
         form.addRow("Sauveteur:", self.combo_sauv_mission)
         form.addRow("Début:", self.date_debut)
         form.addRow("Fin:", self.date_fin)
-        form.addRow("Mission:", self.input_mission)
+        form.addRow("Lieu:", self.input_lieu)      # On a bien le Lieu
+        form.addRow("Mission:", self.combo_mission) # Et le menu Mission
+        
         btn_valider = QPushButton("Ajouter au planning")
         btn_valider.clicked.connect(self.action_valider_mission)
         form.addRow("", btn_valider)
@@ -227,9 +233,7 @@ class MainWindow(QMainWindow):
         spec = self.input_spec.text()
         dep = self.input_dep.text()
         if nom and prenom:
-            # IMPORT LOCAL POUR EVITER LA BOUCLE
             from gestion_sauveteurs.gestion_sauveteurs import ajouter_sauveteur
-            
             ajouter_sauveteur(nom, prenom, dep, spec)
             QMessageBox.information(self, "OK", "Sauveteur ajouté et synchronisé !")
             self.input_nom.clear(); self.input_prenom.clear()
@@ -241,14 +245,22 @@ class MainWindow(QMainWindow):
         sauv_id = self.combo_sauv_mission.currentData()
         debut = self.date_debut.dateTime().toString("yyyy-MM-dd HH:mm:ss")
         fin = self.date_fin.dateTime().toString("yyyy-MM-dd HH:mm:ss")
-        mission = self.input_mission.text()
+        
+        # On récupère le texte du menu déroulant
+        mission = self.combo_mission.currentText()
+        
+        # On récupère le texte du lieu
+        lieu = self.input_lieu.text()
+
         if sauv_id:
-            # IMPORT LOCAL POUR EVITER LA BOUCLE
             from gestion_sauveteurs.gestion_sauveteurs import ajouter_mission
             
-            ajouter_mission(sauv_id, debut, fin, mission)
+            # On envoie tout (mission + lieu)
+            ajouter_mission(sauv_id, debut, fin, mission, lieu)
+            
             QMessageBox.information(self, "OK", "Mission ajoutée et synchronisée !")
             self.planning_widget.charger_donnees() 
+            self.input_lieu.clear()
         else:
             QMessageBox.warning(self, "Erreur", "Sélectionnez un sauveteur")
 
@@ -258,9 +270,7 @@ class MainWindow(QMainWindow):
             id_sauv = self.table_sauveteurs.item(row, 0).text()
             nom = self.table_sauveteurs.item(row, 1).text()
             if QMessageBox.question(self, "Confirm", f"Supprimer {nom} ?") == QMessageBox.Yes:
-                # IMPORT LOCAL POUR EVITER LA BOUCLE
                 from gestion_sauveteurs.gestion_sauveteurs import supprimer_sauveteur
-                
                 supprimer_sauveteur(id_sauv)
                 self.charger_tableau_sauveteurs()
         else:
@@ -295,11 +305,3 @@ def lancer_gestionnaire():
 
 if __name__ == "__main__":
     lancer_gestionnaire()
-    
-    
-    
-    
-    
-    
-    
-    
