@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS sauveteur (
     -- statuts : disponible, approche, sous_terre, gestion, exterieur, repos, civiere, ....
 );
 
--- Table du planning (Lien Sauveteur <-> Créneau horaire)
+-- Table du planning (Lien Sauveteur et Créneau horaire)
 -- On stocke l'état du sauveteur pour un créneau donné
 CREATE TABLE IF NOT EXISTS planning (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS planning (
     heure_debut DATETIME,
     heure_fin DATETIME,
     statut_mission TEXT,
-    lieu TEXT DEFAULT '', -- <--- NOUVELLE COLONNE
+    lieu TEXT DEFAULT '', 
     FOREIGN KEY(sauveteur_id) REFERENCES sauveteur(id) ON DELETE CASCADE
 );
 
