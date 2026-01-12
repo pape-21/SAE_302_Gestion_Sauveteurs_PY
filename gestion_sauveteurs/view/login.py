@@ -3,10 +3,8 @@ from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QLabel, QLineEd
                              QPushButton, QVBoxLayout, QHBoxLayout, QMessageBox, QDialog)
 from PyQt5.QtCore import Qt
 
-# Imports Backend
+# Imports  de mon Backend
 from gestion_sauveteurs.crud.utilisateur import UtilisateurCRUD
-# Note: On n'importe plus les autres vues ici pour éviter les cycles, 
-# car c'est le gestion_sauveteurs.py qui va gérer la suite.
 
 class InterfaceLogin(QWidget):
     """Widget contenant le formulaire de connexion."""
@@ -16,13 +14,11 @@ class InterfaceLogin(QWidget):
         self.fenetre_parente = fenetre_parente
         self.controleur = UtilisateurCRUD()
 
-        # --- STYLE ---
         self.setStyleSheet("background-color: #e9e4de;")
         
         layout_principal = QVBoxLayout(self)
         layout_principal.setContentsMargins(0, 0, 0, 0)
 
-        # Bandeau
         barre_titre = QLabel("Connexion")
         barre_titre.setAlignment(Qt.AlignCenter)
         barre_titre.setFixedHeight(60)
@@ -31,7 +27,6 @@ class InterfaceLogin(QWidget):
 
         layout_principal.addStretch()
 
-        # Champ Login
         h_user = QHBoxLayout()
         h_user.addStretch()
         h_user.addWidget(QLabel("Identifiant :"))
@@ -41,7 +36,6 @@ class InterfaceLogin(QWidget):
         h_user.addStretch()
         layout_principal.addLayout(h_user)
 
-        # Champ Mdp
         h_pw = QHBoxLayout()
         h_pw.addStretch()
         h_pw.addWidget(QLabel("Mot de passe :"))
@@ -54,7 +48,6 @@ class InterfaceLogin(QWidget):
 
         layout_principal.addSpacing(20)
 
-        # Boutons
         h_btn = QHBoxLayout()
         h_btn.addStretch()
         self.btn_connect = QPushButton("Se connecter")
@@ -71,14 +64,14 @@ class InterfaceLogin(QWidget):
         identifiant = self.user.text()
         mdp = self.pw.text()
         
-        # Vérification BDD
+        # Vérification dans la bdd
         role = self.controleur.verifier_connexion(identifiant, mdp)
         
         if role:
-            # Si le parent est une fenêtre de dialogue (cas lancer_login), on lui passe le résultat
+
             if self.fenetre_parente:
                 self.fenetre_parente.role_authentifie = role
-                self.fenetre_parente.accept() # Ferme le dialogue avec succès (result code 1)
+                self.fenetre_parente.accept() # Ferme le dialogue avec succès 
         else:
             QMessageBox.warning(self, "Erreur", "Identifiant ou mot de passe incorrect.")
 
@@ -91,13 +84,14 @@ class FenetreLogin(QDialog):
         self.resize(500, 300)
         self.role_authentifie = None # Variable pour stocker le résultat
         
-        # On intègre le widget créé plus haut
+        # On intègre le widget créé plus haut                                                                             
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         self.widget_login = InterfaceLogin(self)
-        layout.addWidget(self.widget_login)
+        layout.addWidget(self.widget_login)                            
 
 def lancer_login():
+
     """Fonction helper pour afficher la fenêtre de login et récupérer le rôle.
 
     Cette fonction crée une application Qt (si elle n'existe pas), lance

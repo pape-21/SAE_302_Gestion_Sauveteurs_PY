@@ -13,8 +13,8 @@ class DialogueAjoutUtilisateur(QDialog):
         """Initialise le formulaire d'ajout."""
         super().__init__(parent)
         self.setWindowTitle("Ajouter un utilisateur")
-        self.setFixedSize(300, 250)
-        self.controleur = UtilisateurCRUD() # Connexion au moteur
+        self.setFixedSize(300, 250) 
+        self.controleur = UtilisateurCRUD() # Connexion au moteur 
         
         # Titre
         lbl_titre = QLabel("Nouvel Utilisateur", self)

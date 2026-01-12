@@ -14,27 +14,23 @@ class InterfacePlanning(QWidget):
         self.setWindowTitle("Planning Public")
         self.resize(900, 500) # Un peu plus large pour la nouvelle colonne
 
-        # --- STYLE ---
         self.setStyleSheet("background-color: #e9e4de;")
         
         layout_principal = QVBoxLayout(self)
         layout_principal.setContentsMargins(0, 0, 0, 0)
 
-        # Bandeau Titre
         barre_titre = QLabel("Le Planning Opérationnel")
         barre_titre.setAlignment(Qt.AlignCenter)
         barre_titre.setFixedHeight(40)
         barre_titre.setStyleSheet("background-color: #0b6fa4; color: white; font-weight: bold;")
         layout_principal.addWidget(barre_titre)
 
-        # Tableau
         self.table = QTableWidget()
         self.table.setStyleSheet("""
             QTableWidget { border: 1px solid #ccc; gridline-color: #ccc; }
             QHeaderView::section { background-color: #0b6fa4; color: white; font-weight: bold; padding: 8px; }
         """)
 
-        # --- MODIF 1 : Ajout de la colonne "Lieu" ---
         colonnes = ["Sauveteur", "Début", "Fin", "Mission", "Lieu"]
         self.table.setColumnCount(len(colonnes))
         self.table.setHorizontalHeaderLabels(colonnes)
@@ -43,7 +39,6 @@ class InterfacePlanning(QWidget):
 
         layout_principal.addWidget(self.table)
         
-        # Chargement initial
         self.charger_donnees()
 
     def charger_donnees(self):
@@ -52,7 +47,6 @@ class InterfacePlanning(QWidget):
         conn.row_factory = None
         cursor = conn.cursor()
         try:
-            # --- MODIF 2 : On récupère aussi 'p.lieu' dans le SQL ---
             sql = """
                 SELECT s.nom || ' ' || s.prenom, p.heure_debut, p.heure_fin, p.statut_mission, p.lieu
                 FROM planning p
@@ -66,12 +60,9 @@ class InterfacePlanning(QWidget):
             for i, data in enumerate(lignes):
                 self.table.insertRow(i)
                 
-                # data = (Nom, Debut, Fin, Mission, Lieu)
-                # L'index 3 est toujours la Mission pour la couleur
                 statut_texte = str(data[3]).lower()
                 couleur_fond = QColor("white")
                 
-                # --- LOGIQUE COULEURS ---
                 if "disponible" in statut_texte:
                     couleur_fond = QColor("lightgreen")
                 elif "approche" in statut_texte:
@@ -87,9 +78,8 @@ class InterfacePlanning(QWidget):
                 elif "brancardage" in statut_texte or "civière" in statut_texte:
                     couleur_fond = QColor("salmon")
 
-                # On boucle sur toutes les colonnes (maintenant 5)
                 for j, val in enumerate(data):
-                    # Si le lieu est None (vide), on affiche une chaine vide
+
                     texte_cellule = str(val) if val is not None else ""
                     
                     item = QTableWidgetItem(texte_cellule)

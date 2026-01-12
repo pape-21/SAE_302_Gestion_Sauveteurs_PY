@@ -1,9 +1,9 @@
 import sqlite3
 from gestion_sauveteurs.database import DatabaseManager
 
-# --- Fonction utilitaire pour le réseau (Perceval) ---
+# Fonction utilitaire pour le réseau (Perceval) 
 def NOTIFIER_RESEAU(payload):
-    """Fonction placeholder pour simuler l'envoi réseau.
+    """Fonction  pour simuler l'envoi réseau.
 
     Args:
         payload (str): Le message JSON à envoyer.
@@ -11,10 +11,10 @@ def NOTIFIER_RESEAU(payload):
     Returns:
         None
     """
-    # print(f"[NOTIFICATION SIMULÉE] Envoi du payload : {payload}")
     pass
 
 class SauveteurCRUD:
+    
     """Classe de gestion des opérations CRUD pour les sauveteurs.
     """
 
@@ -29,9 +29,9 @@ class SauveteurCRUD:
         Returns:
             list[dict]: Une liste de dictionnaires contenant les infos des sauveteurs.
         """
-        conn = self.db_manager.get_connection()
-        conn.row_factory = sqlite3.Row  
-        cursor = conn.cursor()  
+        conn = self.db_manager.get_connection() 
+        conn.row_factory = sqlite3.Row                                                
+        cursor = conn.cursor()                                                        
         try:
             cursor.execute("SELECT * FROM sauveteur")
             rows = cursor.fetchall()

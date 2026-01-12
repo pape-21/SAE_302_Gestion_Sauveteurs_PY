@@ -18,7 +18,7 @@ class DatabaseManager:
             db_name (str, optional): Le nom du fichier de base de données. 
                 Par défaut "sauveteurs.db".
         """
-        # On calcule le chemin pour que ça marche quel que soit l'endroit d'où on lance le script
+        # On calcule le chemin pour que ça marche quel que soit l'endroit d'où on lance le script 
         base_dir = Path(__file__).resolve().parent.parent
         self.db_path = base_dir / "data" / db_name
         self.sql_script_path = base_dir / "data" / "script_base_de_donne.sql"

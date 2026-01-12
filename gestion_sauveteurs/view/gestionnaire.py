@@ -12,7 +12,7 @@ from gestion_sauveteurs.crud.sauveteur import SauveteurCRUD
 from gestion_sauveteurs.crud.planning import PlanningCRUD
 from gestion_sauveteurs.view.planning_public import InterfacePlanning
 
-# --- DIALOGUE DE SUPPRESSION ---
+#  DIALOGUE DE SUPPRESSION ---
 class DialogueSupprimerMission(QDialog):
     """Dialogue modal pour supprimer une mission par son ID."""
     def __init__(self, parent=None):

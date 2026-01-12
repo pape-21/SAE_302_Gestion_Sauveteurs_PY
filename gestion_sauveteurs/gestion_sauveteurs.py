@@ -5,19 +5,16 @@ from pathlib import Path
 from PyQt5.QtCore import QObject, pyqtSignal
 from PyQt5.QtWidgets import QApplication
 
-# --- IMPORTS VUES (POUR OUVRIR LES FENÊTRES) ---
+#  IMPORTS VUES (POUR OUVRIR LES FENÊTRES) ---
 from gestion_sauveteurs.view.login import lancer_login
 from gestion_sauveteurs.view.administrateur import lancer_administrateur
 from gestion_sauveteurs.view.gestionnaire import lancer_gestionnaire 
 from gestion_sauveteurs.view.planning_public import lancer_planning_public 
 
-# --- IMPORTS RÉSEAU & BDD ---
+#  IMPORTS RÉSEAU & BDD
 from gestion_sauveteurs.connexion_réseaux import pair, envoyer_message
 from gestion_sauveteurs.database import DatabaseManager
 
-# =============================================================================
-# CONFIGURATION & SIGNAUX
-# =============================================================================
 
 # On calcule le chemin absolu pour éviter les erreurs de "fichier introuvable"
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -31,9 +28,7 @@ class SignauxApp(QObject):
     mise_a_jour = pyqtSignal()
 pont_visuel = None 
 
-# =============================================================================
-# 1. LOGIQUE RÉSEAU (RÉCEPTION & ENVOI)
-# =============================================================================
+# LOGIQUE RÉSEAU (RÉCEPTION & ENVOI)
 
 def traitement_message(message, adresse_ip):
     """Callback : Appelé quand on REÇOIT un message d'une autre machine."""
@@ -43,7 +38,7 @@ def traitement_message(message, adresse_ip):
     donnees = message.get("donnees")
 
     try:
-        # On applique la modification en local SANS renvoyer de message (pour éviter une boucle infinie)
+        # On applique la modification en local SANS renvoyer de message 
         if action == "ajout_sauveteur":
             _appliquer_ajout_sauveteur(donnees)
         elif action == "modification_sauveteur":
@@ -58,22 +53,21 @@ def traitement_message(message, adresse_ip):
             _appliquer_suppression_planning(donnees)
         
         # On notifie l'interface graphique si elle est ouverte
+
         if pont_visuel: pont_visuel.mise_a_jour.emit()
             
     except Exception as e:
         print(f"[SYNC ERROR] Impossible d'appliquer la mise à jour : {e}")
 
 
-# =============================================================================
 # 2. FONCTIONS CRUD PUBLIQUES (ACTION LOCALE + DIFFUSION RÉSEAU)
-# =============================================================================
 
-def ajouter_sauveteur(nom, prenom, departement, specialite):
+def ajouter_sauveteur(nom, prenom, departement, specialite):      
     """Ajoute en BDD locale ET envoie l'info au réseau."""
     # 1. Action Locale
     conn = sqlite3.connect(db_path) 
     cur = conn.cursor()
-    cur.execute("INSERT INTO sauveteur (nom, prenom, departement, specialite) VALUES (?, ?, ?, ?)",
+    cur.execute("INSERT INTO sauveteur (nom, prenom, departement, specialite) VALUES (?, ?, ?, ?)",                                   
                 (nom, prenom, departement, specialite))
     new_id = cur.lastrowid
     conn.commit()
@@ -119,7 +113,7 @@ def supprimer_sauveteur(id_sauveteur):
     if pont_visuel: pont_visuel.mise_a_jour.emit()
 
 def ajouter_mission(sauveteur_id, debut, fin, type_mission, lieu=""):
-    """Ajoute une mission au planning (avec lieu optionnel) et diffuse au réseau."""
+    """Ajoute une mission au planning (avec lieu optionnel) et diffuse au réseau."""                                                                                 
     conn = sqlite3.connect(db_path)
     cur = conn.cursor()
     # Mise à jour de la requête pour inclure le lieu
@@ -172,9 +166,7 @@ def supprimer_mission(id_mission):
     if pont_visuel: pont_visuel.mise_a_jour.emit()
 
 
-# =============================================================================
 # 3. FONCTIONS INTERNES (JUSTE BDD, PAS DE RÉSEAU)
-# =============================================================================
 
 def _appliquer_ajout_sauveteur(d):
     conn = sqlite3.connect(db_path)
@@ -219,9 +211,7 @@ def _appliquer_suppression_planning(d):
     conn.close()
 
 
-# =============================================================================
 # . POINT D'ENTRÉE PRINCIPAL (MAIN)
-# =============================================================================
 
 def main():
     """Point d'entrée principal de l'application."""
